@@ -2,86 +2,124 @@ import Card from './card';
 import Deck from './deck';
 import Player from './player';
 import Rules from './rules';
+import mongoose from 'mongoose';
+import {  gameModel , playerModel, cardModel } from '../model/db-model';
 class Game {
-
-  players: Array<Player>;
-  numberOfPlayers: number;
-  deck: Deck = new Deck();
-  currentPlayerTurn: number = 0;
-  currentCard: Card;
-  currentColor: string;
-  isReversed: boolean = false;
-  constructor(numberOfPlayers: number, names: Array<string>) {
-    if (numberOfPlayers < 2) throw new Error("can't start a game with less than 2 players");
-    this.numberOfPlayers = numberOfPlayers;
+   deck: Deck = new Deck();
+  async createGame(gameId: mongoose.Types.ObjectId, players: Array<Player>) {
+    const numberOfPlayers = players.length;
+    //if (numberOfPlayers < 2) throw new Error("can't start a game with less than 2 players");
+    const game = await gameModel.findById(gameId);
     for (let i = 0; i < numberOfPlayers; i++){
-      let player:Player = new Player(names[i],i);
+      let player:Player = new Player(players[i].name,players[i].index);
       // draw 7 cards for each player 
       for (let j = 0; j < 7; j++){
         let card: Card = this.deck.drawCard();
-        player.addCard(card);
+        game.players[i].cards.push(card);
       }
-      this.players.push(player);
     }
     // intialize current card on board with random value
-    this.currentCard = this.deck.drawNonSpecialCard();
-    this.currentColor = this.currentCard.color;
+    game.currentCard = this.deck.drawNonSpecialCard();
+    game.currentColor = game.currentCard.color;
+    await game.save();
+    return game;
   }
-  calculateNextTurn(): void{
-    if (this.isReversed && this.currentPlayerTurn == 0) this.currentPlayerTurn = this.numberOfPlayers - 1;
+  async calculateNextTurn(game){
+    if (game.isReversed && game.currentPlayerTurn == 0) game.currentPlayerTurn = game.numberOfPlayers - 1;
       else {
-        if (this.isReversed) this.currentPlayerTurn--;
-        else this.currentPlayerTurn = (this.currentPlayerTurn + 1) % this.numberOfPlayers;
-      }
+        if (game.isReversed) game.currentPlayerTurn--;
+        else game.currentPlayerTurn = (game.currentPlayerTurn + 1) % game.numberOfPlayers;
+    }
+  }
+  addCard(game,card: Card): void {
+    game.players[game.currentPlayerTurn].cards.push(card);
+  }
+  removeCard(game,index: number): void{
+    game.players[game.currentPlayerTurn].cards.splice(index, 1);
   }
   /**
    * 
    * 0 => false
    * 1 => true
    * 2 => game end
+   * 3 => choose color
    */
-  play(cardIndex:number,card: Card): number{
-    let rule: Rules = new Rules(this.currentCard, card,this.currentColor);
+  async play(gameId: mongoose.Types.ObjectId, playerIndex: Number, cardIndex: number, card: Card) {
+   // console.log(playerIndex, cardIndex, card);
+    card.isSpecial = card.isspecial;
+    const game = await gameModel.findById(gameId);
+    if (game.currentPlayerTurn != playerIndex) return 0;
+    let rule: Rules = new Rules(game.currentCard, card,game.currentColor);
     let ruleNumber: number = rule.getRule();
     if (!ruleNumber) return 0;
-    this.currentColor = card.color;
-    this.currentCard = card;
-    this.players[this.currentPlayerTurn].removeCard(cardIndex);
-    if (this.players[this.currentPlayerTurn].cards.length == 0) return 2;
+    game.currentColor = card.color;
+    game.currentCard = card;
+    this.removeCard(game,cardIndex);
+    if (game.players[game.currentPlayerTurn].cards.length == 0) {
+      await game.save();
+      return 2;
+    }
     if (ruleNumber == 1) {
-      this.calculateNextTurn();
+      this.calculateNextTurn(game);
     } else if (ruleNumber == 2) {
-      this.calculateNextTurn();
+      this.calculateNextTurn(game);
       // draw 2 cards for the next player
-      this.players[this.currentPlayerTurn].addCard(this.deck.drawCard());
-      this.players[this.currentPlayerTurn].addCard(this.deck.drawCard());
+      this.addCard(game,this.deck.drawCard());
+      this.addCard(game,this.deck.drawCard());
     } else if (ruleNumber == 3) {
       // skip player
-      this.calculateNextTurn();
-      this.calculateNextTurn();
+      this.calculateNextTurn(game);
+      this.calculateNextTurn(game);
     } else if (ruleNumber == 4) {
       // reverse 
-      this.isReversed = true;
-      this.calculateNextTurn();
+      game.isReversed = true;
+      this.calculateNextTurn(game);
     } else if (ruleNumber == 5) {
-      // prompt user to choose color 
-      let inputColor:string = prompt("choose the color");
-      this.currentColor = inputColor;
-      this.calculateNextTurn();
+      // prompt user to choose color emit event "selectColor"
+     // let inputColor:string = prompt("choose the color");
+    //  game.currentColor = inputColor;
+      //this.calculateNextTurn(game);
+      await game.save();
+      return 3;
     } else if (ruleNumber == 6) {
-      // prompt user to choose color 
-      let inputColor:string = prompt("choose the color");
-      this.currentColor = inputColor;
-      this.calculateNextTurn();
+      // prompt user to choose color emit event "selectColor"
+     // let inputColor:string = prompt("choose the color");
+     // game.currentColor = inputColor;
+      this.calculateNextTurn(game);
       // +4 current user
-      this.players[this.currentPlayerTurn].addCard(this.deck.drawCard());
-      this.players[this.currentPlayerTurn].addCard(this.deck.drawCard());
-      this.players[this.currentPlayerTurn].addCard(this.deck.drawCard());
-      this.players[this.currentPlayerTurn].addCard(this.deck.drawCard());
+      this.addCard(game,this.deck.drawCard());
+      this.addCard(game,this.deck.drawCard());
+      this.addCard(game,this.deck.drawCard());
+      this.addCard(game, this.deck.drawCard());
+      game.isReversed = !game.isReversed;
+      this.calculateNextTurn(game);
+      game.isReversed = !game.isReversed;
+      await game.save();
+      return 3;
     }
+    await game.save();
     return 1;
+ 
+  }
+  async changCurrentColor(gameId: mongoose.Types.ObjectId, color: string,playerIndex:number,playerId:string) {
+    const game = await gameModel.findById(gameId);
+    if (game.currentPlayerTurn != playerIndex) return 0;
+    if (game.players[game.currentPlayerTurn].playerId != playerId) return 0;
+    if (["red", "yellow", "blue", "green"].includes(color)) {
+      game.currentColor = color;
+      this.calculateNextTurn(game);
+      await game.save();
+      return game;
+    }
+    return 0;
   }
 
+  async drawCard(gameId: mongoose.Types.ObjectId, playerIndex: number) {
+    const game = await gameModel.findById(gameId);
+    if (game.currentPlayerTurn != playerIndex) return 0;
+    game.players[playerIndex].cards.push(this.deck.drawCard());
+    await game.save();
+  }
 }
 
 export default Game;
