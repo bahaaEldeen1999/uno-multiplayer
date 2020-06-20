@@ -200,6 +200,9 @@ socket.on('connect',async ()=>{
     socket.on("getCards",(data)=>{
         if(playerId != data.playerId) return;
         cards = data.cards;
+        //document.querySelector("#frame").innerHTML = "";
+        var $owl = $('.owl-carousel');
+        $owl.trigger('destroy.owl.carousel');
         ReactDOM.unmountComponentAtNode(document.querySelector("#frame"));
         ReactDOM.render(
             React.createElement(Deck,

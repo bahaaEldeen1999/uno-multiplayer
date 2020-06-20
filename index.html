@@ -170,7 +170,7 @@ display: block;
   
     <div class="deck-wrapper">
         <div class="deck">
-            <div class="frame" id="frame">
+            <div class="frame owl-carousel owl-theme carousel" id="frame">
 
             </div>
         </div>  
@@ -186,10 +186,11 @@ display: block;
     <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
     <script type="text/javascript" src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
 
-    <script type="text/javascript" src="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
 <!-- Compiled and minified JavaScript -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-   
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+
     <script>
         let height = document.querySelector(".content").scrollHeight-200;
         document.querySelector(".board").style.height = `${height}px`;
