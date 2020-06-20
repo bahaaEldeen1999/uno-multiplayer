@@ -177,7 +177,7 @@ io.on("connection", (socket) => {
 
   socket.on("drawCard", async (data) => {
     await gameController.drawCard(data.gameId, data.playerIndex);
-    let game = await gameModel.findById(data.gameId)
+    let game = await gameModel.findById(data.gameId);
     let players = [];
     for (let player of game.players) {
       players.push({
@@ -193,6 +193,13 @@ io.on("connection", (socket) => {
       currentPlayerTurn: game.currentPlayerTurn,
       currenColor: game.currentColor
     });
+    // update each on cards
+    for (let player of game.players) {
+      io.sockets.emit("getCards", {
+        playerId: player.playerId,
+        cards: player.cards
+      });
+    }
 
   });
 
@@ -217,6 +224,13 @@ io.on("connection", (socket) => {
         currentPlayerTurn: game.currentPlayerTurn,
         currenColor: game.currentColor
       });
+      // update each on cards
+    for (let player of game.players) {
+      io.sockets.emit("getCards", {
+        playerId: player.playerId,
+        cards: player.cards
+      });
+    }
 
    
     }

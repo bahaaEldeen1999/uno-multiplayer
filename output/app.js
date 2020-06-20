@@ -168,8 +168,7 @@ socket.on('connect',async ()=>{
     socket.on("gameUpdated",(data)=>{
         if(gameId != data.gameId) return;
         drawCard = 0;
-        document.querySelector("#frame").innerHTML = "";
-        ReactDOM.unmountComponentAtNode(document.querySelector(".players .collection"))
+        ReactDOM.unmountComponentAtNode(document.querySelector(".players ul"))
         ReactDOM.unmountComponentAtNode(document.querySelector(".board"))
         ReactDOM.unmountComponentAtNode(document.querySelector("#queue"))
         players = [];
@@ -187,7 +186,7 @@ socket.on('connect',async ()=>{
                 index:playerIndex,
                 currentTurn:data.currentPlayerTurn
             }, null),
-            document.querySelector(".players .collection")
+            document.querySelector(".players ul")
           );
          
           ReactDOM.render(
@@ -200,12 +199,15 @@ socket.on('connect',async ()=>{
 
     socket.on("getCards",(data)=>{
         if(playerId != data.playerId) return;
-        window.deckComponent.removeCards();
         cards = data.cards;
-        document.querySelector("#frame").innerHTML = "";
-        for(let card of cards){
-            window.deckComponent.addCard({value:card.value,isSpecial:card.isSpecial,color:card.color});
-        }
+        ReactDOM.unmountComponentAtNode(document.querySelector("#frame"));
+        ReactDOM.render(
+            React.createElement(Deck,
+            {
+                cards:cards
+            },
+            null)
+        ,document.querySelector("#frame"));
         let cardsDoc = document.querySelectorAll(".card-deck");
         cardsDoc.forEach(card =>{
             card.addEventListener("click",(e)=>{

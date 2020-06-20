@@ -198,6 +198,13 @@ io.on("connection", (socket) => {
             currentPlayerTurn: game.currentPlayerTurn,
             currenColor: game.currentColor
         });
+        // update each on cards
+        for (let player of game.players) {
+            io.sockets.emit("getCards", {
+                playerId: player.playerId,
+                cards: player.cards
+            });
+        }
     }));
     socket.on("endTurn", (data) => __awaiter(void 0, void 0, void 0, function* () {
         let game = yield db_model_1.gameModel.findById(data.gameId);
@@ -219,6 +226,13 @@ io.on("connection", (socket) => {
                 currentPlayerTurn: game.currentPlayerTurn,
                 currenColor: game.currentColor
             });
+            // update each on cards
+            for (let player of game.players) {
+                io.sockets.emit("getCards", {
+                    playerId: player.playerId,
+                    cards: player.cards
+                });
+            }
         }
     }));
 });

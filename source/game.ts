@@ -24,12 +24,14 @@ class Game {
     await game.save();
     return game;
   }
-  async calculateNextTurn(game){
+  async calculateNextTurn(game) {
+    game.players[game.currentPlayerTurn].drawCard = false;
     if (game.isReversed && game.currentPlayerTurn == 0) game.currentPlayerTurn = game.numberOfPlayers - 1;
       else {
         if (game.isReversed) game.currentPlayerTurn--;
         else game.currentPlayerTurn = (game.currentPlayerTurn + 1) % game.numberOfPlayers;
     }
+    
   }
   addCard(game,card: Card): void {
     game.players[game.currentPlayerTurn].cards.push(card);
@@ -49,6 +51,7 @@ class Game {
     card.isSpecial = card.isspecial;
     const game = await gameModel.findById(gameId);
     if (game.currentPlayerTurn != playerIndex) return 0;
+    game.players[game.currentPlayerTurn].drawCard = false;
     let rule: Rules = new Rules(game.currentCard, card,game.currentColor);
     let ruleNumber: number = rule.getRule();
     if (!ruleNumber) return 0;
@@ -75,16 +78,10 @@ class Game {
       game.isReversed = true;
       this.calculateNextTurn(game);
     } else if (ruleNumber == 5) {
-      // prompt user to choose color emit event "selectColor"
-     // let inputColor:string = prompt("choose the color");
-    //  game.currentColor = inputColor;
-      //this.calculateNextTurn(game);
+
       await game.save();
       return 3;
     } else if (ruleNumber == 6) {
-      // prompt user to choose color emit event "selectColor"
-     // let inputColor:string = prompt("choose the color");
-     // game.currentColor = inputColor;
       this.calculateNextTurn(game);
       // +4 current user
       this.addCard(game,this.deck.drawCard());
@@ -116,9 +113,11 @@ class Game {
 
   async drawCard(gameId: mongoose.Types.ObjectId, playerIndex: number) {
     const game = await gameModel.findById(gameId);
-    if (game.currentPlayerTurn != playerIndex) return 0;
+    if (game.currentPlayerTurn != playerIndex || game.players[playerIndex].drawCard == 1) return 0;
     game.players[playerIndex].cards.push(this.deck.drawCard());
+    game.players[playerIndex].drawCard = true;
     await game.save();
+    
   }
 }
 

@@ -14,85 +14,20 @@ var Deck = function (_React$Component) {
 
         var _this = _possibleConstructorReturn(this, (Deck.__proto__ || Object.getPrototypeOf(Deck)).call(this, props));
 
-        _this.carouselOption = {
-            margin: 5,
-            nav: false,
-            responsive: {
-                0: {
-                    items: 1,
-                    nav: true
-                },
-                600: {
-                    items: 5,
-                    nav: false
-                },
-                1000: {
-                    items: 9,
-                    nav: true,
-                    loop: false
-                },
-                2000: {
-                    items: 19,
-                    nav: true,
-                    loop: false
-                }
-            }
+        _this.cards = props.cards;
 
-        };
-
-        _this.state = {
-            cards: []
-        };
-        _this.addCard.bind(_this);
-        _this.removeCard.bind(_this);
-        _this.mousOver.bind(_this);
-        // get globla reference
-        window.deckComponent = _this;
         return _this;
     }
 
     _createClass(Deck, [{
-        key: "addCard",
-        value: function addCard(card) {
-            this.setState(function (prevState) {
-                prevState.cards.push(card);
-                return prevState;
-            });
-        }
-    }, {
-        key: "removeCard",
-        value: function removeCard(index) {
-            var a = this.state.cards;
-            a.splice(index, 1);
-            this.setState({ cards: a });
-        }
-    }, {
-        key: "componentDidMount",
-        value: function componentDidMount() {}
-    }, {
-        key: "componentDidUpdate",
-        value: function componentDidUpdate() {}
-    }, {
-        key: "removeCards",
-        value: function removeCards() {
-            this.setState({ cards: [] });
-        }
-    }, {
-        key: "mousOver",
-        value: function mousOver(e) {
-            this.removeCard(e);
-        }
-    }, {
         key: "render",
         value: function render() {
-            var _this2 = this;
 
-            return this.state.cards.map(function (card, index) {
+            return this.cards.map(function (card, index) {
+
                 return React.createElement(
                     "div",
-                    { className: "item-slick slidee", onClick: function onClick() {
-                            return _this2.mousOver(index);
-                        } },
+                    { className: "item-slick slidee" },
                     React.createElement(Card, { key: Math.floor(Math.random() * 100000), index: index, value: card.value, color: card.color, isSpecial: card.isSpecial })
                 );
             });
@@ -101,5 +36,3 @@ var Deck = function (_React$Component) {
 
     return Deck;
 }(React.Component);
-
-ReactDOM.render(React.createElement(Deck, null), document.querySelector("#frame"));

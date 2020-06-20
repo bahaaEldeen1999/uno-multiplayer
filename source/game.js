@@ -42,6 +42,7 @@ class Game {
     }
     calculateNextTurn(game) {
         return __awaiter(this, void 0, void 0, function* () {
+            game.players[game.currentPlayerTurn].drawCard = false;
             if (game.isReversed && game.currentPlayerTurn == 0)
                 game.currentPlayerTurn = game.numberOfPlayers - 1;
             else {
@@ -72,6 +73,7 @@ class Game {
             const game = yield db_model_1.gameModel.findById(gameId);
             if (game.currentPlayerTurn != playerIndex)
                 return 0;
+            game.players[game.currentPlayerTurn].drawCard = false;
             let rule = new rules_1.default(game.currentCard, card, game.currentColor);
             let ruleNumber = rule.getRule();
             if (!ruleNumber)
@@ -103,17 +105,10 @@ class Game {
                 this.calculateNextTurn(game);
             }
             else if (ruleNumber == 5) {
-                // prompt user to choose color emit event "selectColor"
-                // let inputColor:string = prompt("choose the color");
-                //  game.currentColor = inputColor;
-                //this.calculateNextTurn(game);
                 yield game.save();
                 return 3;
             }
             else if (ruleNumber == 6) {
-                // prompt user to choose color emit event "selectColor"
-                // let inputColor:string = prompt("choose the color");
-                // game.currentColor = inputColor;
                 this.calculateNextTurn(game);
                 // +4 current user
                 this.addCard(game, this.deck.drawCard());
@@ -149,9 +144,10 @@ class Game {
     drawCard(gameId, playerIndex) {
         return __awaiter(this, void 0, void 0, function* () {
             const game = yield db_model_1.gameModel.findById(gameId);
-            if (game.currentPlayerTurn != playerIndex)
+            if (game.currentPlayerTurn != playerIndex || game.players[playerIndex].drawCard == 1)
                 return 0;
             game.players[playerIndex].cards.push(this.deck.drawCard());
+            game.players[playerIndex].drawCard = true;
             yield game.save();
         });
     }
