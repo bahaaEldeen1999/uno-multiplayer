@@ -60,7 +60,7 @@ class Game {
         game.players[game.currentPlayerTurn].cards.splice(index, 1);
     }
     /**
-     *
+     * -1 => not your turn
      * 0 => false
      * 1 => true
      * 2 => game end
@@ -72,7 +72,7 @@ class Game {
             card.isSpecial = card.isspecial;
             const game = yield db_model_1.gameModel.findById(gameId);
             if (game.currentPlayerTurn != playerIndex)
-                return 0;
+                return -1;
             game.players[game.currentPlayerTurn].drawCard = false;
             let rule = new rules_1.default(game.currentCard, card, game.currentColor);
             let ruleNumber = rule.getRule();
@@ -149,6 +149,7 @@ class Game {
             game.players[playerIndex].cards.push(this.deck.drawCard());
             game.players[playerIndex].drawCard = true;
             yield game.save();
+            return 1;
         });
     }
 }

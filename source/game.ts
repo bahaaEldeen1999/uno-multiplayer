@@ -40,7 +40,7 @@ class Game {
     game.players[game.currentPlayerTurn].cards.splice(index, 1);
   }
   /**
-   * 
+   * -1 => not your turn
    * 0 => false
    * 1 => true
    * 2 => game end
@@ -50,7 +50,7 @@ class Game {
    // console.log(playerIndex, cardIndex, card);
     card.isSpecial = card.isspecial;
     const game = await gameModel.findById(gameId);
-    if (game.currentPlayerTurn != playerIndex) return 0;
+    if (game.currentPlayerTurn != playerIndex) return -1;
     game.players[game.currentPlayerTurn].drawCard = false;
     let rule: Rules = new Rules(game.currentCard, card,game.currentColor);
     let ruleNumber: number = rule.getRule();
@@ -117,6 +117,7 @@ class Game {
     game.players[playerIndex].cards.push(this.deck.drawCard());
     game.players[playerIndex].drawCard = true;
     await game.save();
+    return 1;
     
   }
 }

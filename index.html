@@ -37,7 +37,7 @@ right: 0;
 }
 .deck-wrapper{
 flex-shrink: 0;
-
+position: relative;
 }
 .content {
 flex: 1 0 auto;
@@ -75,11 +75,11 @@ min-width: 100%;
     transform: translateY(-10px) !important;
     transform: translateZ(20px) !important;
 }
-.frame{
+ #frame{
     display: flex;
-    justify-content: center;
-    overflow-x: auto;
-}
+  justify-content: center;
+  align-items: center;
+ }
 .turn{
     transform: scale(1.1);
 }
@@ -192,8 +192,8 @@ display: block;
    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
 
     <script>
-        let height = document.querySelector(".content").scrollHeight-200;
-        document.querySelector(".board").style.height = `${height}px`;
+        // let height = document.querySelector(".content").scrollHeight-200;
+        // document.querySelector(".board").style.height = `${height}px`;
         const socket = io('/');
       
     </script>

@@ -120,7 +120,22 @@ io.on("connection", (socket) => {
     // player play card
     socket.on("playCard", (data) => __awaiter(void 0, void 0, void 0, function* () {
         let isPlayed = yield gameController.play(data.gameId, data.playerIndex, data.cardIndex, data.card);
-        console.log(isPlayed);
+        if (isPlayed == -1) {
+            socket.emit("wrongTurn", {
+                gameId: data.gameId,
+                playerIndex: data.playerIndex,
+                playerId: data.playerId
+            });
+            return;
+        }
+        else if (isPlayed == 0) {
+            socket.emit("wrongMove", {
+                gameId: data.gameId,
+                playerIndex: data.playerIndex,
+                playerId: data.playerId
+            });
+            return;
+        }
         let game = yield db_model_1.gameModel.findById(data.gameId);
         let players = [];
         for (let player of game.players) {
@@ -144,10 +159,7 @@ io.on("connection", (socket) => {
                 cards: player.cards
             });
         }
-        if (isPlayed == 0) {
-            io.sockets.emit("wrongMove", { gameId: data.gameId, playerIndex: data.playerIndex, error: "invalid move" });
-        }
-        else if (isPlayed == 1) {
+        if (isPlayed == 1) {
             io.sockets.emit("greatMove", { gameId: data.gameId, playerIndex: data.playerIndex, success: "valid move" });
         }
         else if (isPlayed == 3) {
@@ -181,7 +193,15 @@ io.on("connection", (socket) => {
         });
     }));
     socket.on("drawCard", (data) => __awaiter(void 0, void 0, void 0, function* () {
-        yield gameController.drawCard(data.gameId, data.playerIndex);
+        let x = yield gameController.drawCard(data.gameId, data.playerIndex);
+        if (!x) {
+            socket.emit("cannotDraw", {
+                gameId: data.gameId,
+                playerIndex: data.playerIndex,
+                playerId: data.playerId,
+            });
+            return;
+        }
         let game = yield db_model_1.gameModel.findById(data.gameId);
         let players = [];
         for (let player of game.players) {

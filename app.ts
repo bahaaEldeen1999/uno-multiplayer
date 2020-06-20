@@ -6,6 +6,7 @@ import Game from './source/game';
 import path from 'path';
 import mongoose from 'mongoose';
 import {  gameModel , playerModel, cardModel } from './model/db-model';
+import { createSocket } from 'dgram';
 
 
 // create the game
@@ -113,7 +114,21 @@ io.on("connection", (socket) => {
   // player play card
   socket.on("playCard", async (data) => {
     let isPlayed = await gameController.play(data.gameId, data.playerIndex, data.cardIndex, data.card);
-    console.log(isPlayed)
+    if (isPlayed == -1) {
+      socket.emit("wrongTurn", {
+        gameId: data.gameId,
+        playerIndex: data.playerIndex,
+        playerId:data.playerId
+      });
+      return;
+    }else if (isPlayed == 0) {
+      socket.emit("wrongMove", {
+        gameId: data.gameId,
+        playerIndex: data.playerIndex,
+        playerId:data.playerId
+      });
+      return;
+    } 
     let game = await gameModel.findById(data.gameId);
     let players = [];
     for (let player of game.players) {
@@ -137,9 +152,8 @@ io.on("connection", (socket) => {
         cards: player.cards
       });
     }
-    if (isPlayed == 0) {
-      io.sockets.emit("wrongMove", { gameId:data.gameId,playerIndex:data.playerIndex,error: "invalid move" });
-    } else if (isPlayed == 1) {
+
+     if (isPlayed == 1) {
       io.sockets.emit("greatMove", { gameId:data.gameId,playerIndex:data.playerIndex,success: "valid move" });
     } else if (isPlayed == 3) {
       io.sockets.emit("chooseColor", {
@@ -176,7 +190,15 @@ io.on("connection", (socket) => {
   });
 
   socket.on("drawCard", async (data) => {
-    await gameController.drawCard(data.gameId, data.playerIndex);
+    let x = await gameController.drawCard(data.gameId, data.playerIndex);
+    if (!x) {
+      socket.emit("cannotDraw", {
+        gameId: data.gameId,
+        playerIndex: data.playerIndex,
+        playerId:data.playerId,
+      })
+      return;
+    } 
     let game = await gameModel.findById(data.gameId);
     let players = [];
     for (let player of game.players) {

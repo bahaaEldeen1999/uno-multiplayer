@@ -167,6 +167,15 @@ socket.on('connect',async ()=>{
     })
     socket.on("gameUpdated",(data)=>{
         if(gameId != data.gameId) return;
+        if(playerIndex == data.currentPlayerTurn){
+            swal.fire({
+                icon: 'info',
+                title: 'Your Turn',
+                timer: 500,
+                
+                showConfirmButton:false
+            });
+        }
         drawCard = 0;
         ReactDOM.unmountComponentAtNode(document.querySelector(".players ul"))
         ReactDOM.unmountComponentAtNode(document.querySelector(".board"))
@@ -223,7 +232,8 @@ socket.on('connect',async ()=>{
                         value:Number(e.target.attributes.value.value),
                         color:e.target.attributes.color.value
                     },
-                    cardIndex:Number(e.target.attributes.index.value)
+                    cardIndex:Number(e.target.attributes.index.value),
+                    playerId:playerId
                 }
                 socket.emit("playCard",data);
             })
@@ -257,7 +267,37 @@ socket.on('connect',async ()=>{
             });
         })
     })
+    socket.on("wrongMove",(data)=>{
+        if(data.gameId != gameId || data.playerId != playerId)return;
+        swal.fire({
+            icon: 'error',
+            title: 'invalid move',
+            timer: 500,
+            
+            showConfirmButton:false
+        });
+    })
+    socket.on("wrongTurn",(data)=>{
+        if(data.gameId != gameId || data.playerId != playerId)return;
+        swal.fire({
+            icon: 'error',
+            title: 'wait your turn',
+            timer: 500,
+            
+            showConfirmButton:false
+        });
+    })
 
+    socket.on("cannotDraw",(data)=>{
+        if(data.gameId != gameId || data.playerId != playerId)return;
+        swal.fire({
+            icon: 'error',
+            title: 'cannot draw more cards this turn',
+            timer: 500,
+            
+            showConfirmButton:false
+        });
+    })
     
 });
 
