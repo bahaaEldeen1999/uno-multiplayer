@@ -27,9 +27,9 @@ let gameController = new game_1.default();
 const app = express_1.default();
 const PORT = 3000;
 const server = http_1.default.createServer(app);
-mongoose_1.default.connect("mongodb://localhost/uno", { useNewUrlParser: true });
+mongoose_1.default.connect(process.env.CONNECTION_STRING, { useNewUrlParser: true });
 mongoose_1.default.connection.once("open", () => {
-    console.log("connected to db");
+    console.log("connected to db " + process.env.CONNECTION_STRING);
 });
 app.use(cors_1.default());
 app.use(express_1.default.static('output'));
@@ -131,18 +131,10 @@ io.on("connection", (socket) => {
                 currentPlayerTurn: game.currentPlayerTurn,
                 currenColor: game.currentColor
             });
-            let uno = false;
             for (let player of game.players) {
                 io.sockets.emit("getCards", {
                     playerId: player.playerId,
                     cards: player.cards,
-                    gameId: data.gameId
-                });
-                if (player.cards.length == 1)
-                    uno = true;
-            }
-            if (uno) {
-                io.sockets.emit("uno", {
                     gameId: data.gameId
                 });
             }
@@ -189,14 +181,14 @@ io.on("connection", (socket) => {
             });
             // update each on cards
             let uno = false;
+            if (game.players[data.playerIndex].cards.length == 1)
+                uno = true;
             for (let player of game.players) {
                 io.sockets.emit("getCards", {
                     playerId: player.playerId,
                     cards: player.cards,
                     gameId: data.gameId
                 });
-                if (player.cards.length == 1)
-                    uno = true;
             }
             if (uno) {
                 io.sockets.emit("uno", {
@@ -278,18 +270,10 @@ io.on("connection", (socket) => {
                 cardDrawn: true
             });
             // update each on cards
-            let uno = false;
             for (let player of game.players) {
                 io.sockets.emit("getCards", {
                     playerId: player.playerId,
                     cards: player.cards,
-                    gameId: data.gameId
-                });
-                if (player.cards.length == 1)
-                    uno = true;
-            }
-            if (uno) {
-                io.sockets.emit("uno", {
                     gameId: data.gameId
                 });
             }
@@ -322,18 +306,10 @@ io.on("connection", (socket) => {
                     currenColor: game.currentColor
                 });
                 // update each on cards
-                let uno = false;
                 for (let player of game.players) {
                     io.sockets.emit("getCards", {
                         playerId: player.playerId,
                         cards: player.cards,
-                        gameId: data.gameId
-                    });
-                    if (player.cards.length == 1)
-                        uno = true;
-                }
-                if (uno) {
-                    io.sockets.emit("uno", {
                         gameId: data.gameId
                     });
                 }
@@ -347,4 +323,4 @@ io.on("connection", (socket) => {
         }
     }));
 });
-server.listen(PORT, () => { console.log(`listening on port ${PORT}`); });
+server.listen(process.env.PORT || PORT, () => { console.log(`listening on port ${process.env.PORT || PORT}`); });

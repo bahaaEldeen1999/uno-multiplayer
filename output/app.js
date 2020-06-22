@@ -83,6 +83,8 @@ socket.on('connect',async ()=>{
                 gameId = data.gameId;
                 $("#gameIdText").text(data.gameId);
                 playerIndex = 0;
+                
+
         });
         modalHost.open();      
     });
@@ -102,10 +104,23 @@ socket.on('connect',async ()=>{
             socket.emit("startGame",{
                 gameId:gameId
             });
-            startGameBtn.remove();
 
         });
         document.querySelector("#startGameDiv").appendChild(startGameBtn);
+        // add game id to floating point
+        //<a class="btn-floating btn-large waves-effect waves-light red"><i class="material-icons">add</i></a
+        let showGameId = document.createElement('a');
+        showGameId.className = "btn-floating btn-large waves-effect waves-light teal"
+        showGameId.innerText = "gameId";
+        showGameId.addEventListener("click",()=>{
+            swal.fire({
+                icon: 'info',
+                title: "your game id is : "+gameId,      
+                showConfirmButton:true
+            });
+        });
+        document.body.appendChild(showGameId);
+
 
     })
     joinBtn.click(()=>{
@@ -114,7 +129,10 @@ socket.on('connect',async ()=>{
         modalJoin.open();
     }); 
     joinGameBtn.click(async ()=>{
-        if(!document.querySelector("#gameIdInput").value) modalJoin.open();
+        if(!document.querySelector("#gameIdInput").value){
+            modalJoin.close();
+             modalJoin.open();
+            }
         else{
             gameId = document.querySelector("#gameIdInput").value;
             modalJoin.close();
@@ -128,6 +146,17 @@ socket.on('connect',async ()=>{
                 console.log("joined game with id "+data.gameId);
                 showQueue = true;
                 playerIndex = data.index;
+                let showGameId = document.createElement('a');
+                showGameId.className = "btn-floating btn-large waves-effect waves-light teal"
+                showGameId.innerText = "gameId";
+                showGameId.addEventListener("click",()=>{
+                    swal.fire({
+                        icon: 'info',
+                        title: "your game id is : "+gameId,      
+                        showConfirmButton:true
+                    });
+                });
+                document.body.appendChild(showGameId);
             });
         }
 
@@ -137,6 +166,7 @@ socket.on('connect',async ()=>{
         if(gameId != data.gameId) return;
         document.querySelector("#queue").innerHTML = "";
         document.querySelector("#queue").className= "";
+        if(document.querySelector("#startGameBtn"))document.querySelector("#startGameBtn").remove();
         players = [];
         for(let player of data.players){
             players.push({

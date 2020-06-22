@@ -13,16 +13,32 @@ class Deck extends React.Component{
                 items:2,
                 nav:true,
             },
+            400:{
+                items:4,
+                nav:true,
+            },
             600:{
-                items:5,
+                items:6,
+                nav:true,
+            },
+            800:{
+                items:8,
                 nav:true,
             },
             1000:{
-                items:9,
+                items:10,
+                nav:true,
+            },
+            1200:{
+                items:12,
+                nav:true,
+            },
+            1500:{
+                items:15,
                 nav:true,
             },
             2000:{
-                items:19,
+                items:20,
                 nav:true,
             }
         }

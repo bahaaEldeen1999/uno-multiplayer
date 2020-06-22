@@ -7,8 +7,7 @@ import path from 'path';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import {  gameModel , playerModel, cardModel } from './model/db-model';
-import { createSocket } from 'dgram';
-import e from 'express';
+
 dotenv.config();
 
 // create the game
@@ -17,9 +16,9 @@ let gameController: Game = new Game();
 const app = express();
 const PORT = 3000;
 const server = http.createServer(app);
-mongoose.connect("mongodb://localhost/uno", { useNewUrlParser: true });
+mongoose.connect(process.env.CONNECTION_STRING, { useNewUrlParser: true });
 mongoose.connection.once("open", () => {
-  console.log("connected to db")
+  console.log("connected to db "+process.env.CONNECTION_STRING)
 })
 app.use(cors());
 app.use(express.static('output'));
@@ -331,4 +330,4 @@ io.on("connection", (socket) => {
 
 
 
-server.listen(PORT,()=>{console.log(`listening on port ${PORT}`)})
+server.listen(process.env.PORT|| PORT,()=>{console.log(`listening on port ${process.env.PORT|| PORT}`)})
