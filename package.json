@@ -2,11 +2,9 @@
   "name": "uno",
   "version": "1.0.0",
   "description": "uno multiplayer",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "webpack-dev-server",
-    "build": "webpack",
     "start": " tsc && node app.js"
   },
   "repository": {
@@ -23,10 +21,7 @@
     "@types/express": "^4.17.6",
     "@types/node": "^14.0.13",
     "ts-loader": "^7.0.5",
-    "typescript": "^3.9.5",
-    "webpack": "^4.43.0",
-    "webpack-cli": "^3.3.11",
-    "webpack-dev-server": "^3.11.0"
+    "typescript": "^3.9.5"
   },
   "dependencies": {
     "babel-cli": "^6.26.0",
