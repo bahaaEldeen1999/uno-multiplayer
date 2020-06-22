@@ -18,22 +18,41 @@ for(let i=0;i<32;i++){
     playerId += String((Math.floor(Math.random()*10)))
 }
 playerId = String(playerId)
-
+let methodClick = "click";
 socket.on('connect',async ()=>{
     console.log("connected client");
     // create the choosing window to be host or join
-    $('#modal1').modal();
-    $('#modal2').modal();
-    $('.host-modal').modal();
-    $('.join-modal').modal();
-    $('#modal5').modal();
+    let modalOptions = {
+        inDuration:100,
+        outDuration:100,
+        dismissible:false
+    }
+    $('#modal1').modal(modalOptions);
+    $('#modal2').modal(modalOptions);
+    $('.host-modal').modal(modalOptions);
+    $('.join-modal').modal(modalOptions);
+    $('#modal5').modal(modalOptions);
+    $('#method').modal(modalOptions);
     let modal1 = M.Modal.getInstance($('#modal1'));     
     let modal2 = M.Modal.getInstance($('#modal2'));     
+    let method = M.Modal.getInstance($('#method'));     
     let modalHost = M.Modal.getInstance($('.host-modal'));     
     let modalJoin = M.Modal.getInstance($('.join-modal'));     
     let modalChooseColor = M.Modal.getInstance($('#modal5'));
     let chooseColorBtn = document.querySelector("#choosColorBtn");     
-    modal1.open();
+    let dblClickBtn = document.querySelector("#dblClickBtn");     
+    let snglClickBtn = document.querySelector("#snglClickBtn");   
+    method.open();
+    dblClickBtn.addEventListener('click',()=>{
+        methodClick = "dblclick";
+        method.close();
+        modal1.open();
+    });
+    snglClickBtn.addEventListener('click',()=>{
+        methodClick = "click";
+        method.close();
+        modal1.open();
+    });
     // get user name
     $("#nameEnterBtn").click(()=>{
         let inputText =document.querySelector("#nameInput").value;
@@ -117,7 +136,8 @@ socket.on('connect',async ()=>{
     socket.on("gameCreated",(data)=>{
         if(gameId != data.gameId) return;
         document.querySelector("#queue").innerHTML = "";
-        document.querySelector("#queue").className = "";
+        document.querySelector("#queue").className= "";
+        players = [];
         for(let player of data.players){
             players.push({
                 name: player.name,
@@ -167,7 +187,7 @@ socket.on('connect',async ()=>{
     })
     socket.on("gameUpdated",(data)=>{
         if(gameId != data.gameId) return;
-        if(playerIndex == data.currentPlayerTurn){
+        if(playerIndex == data.currentPlayerTurn && !data.cardDrawn){
             swal.fire({
                 icon: 'info',
                 title: 'Your Turn',
@@ -222,7 +242,7 @@ socket.on('connect',async ()=>{
         ,document.querySelector("#frame"));
         let cardsDoc = document.querySelectorAll(".card-deck");
         cardsDoc.forEach(card =>{
-            card.addEventListener("click",(e)=>{
+            card.addEventListener(methodClick,(e)=>{
                 drawCard = 0;
                 let data = {
                     gameId:gameId,
@@ -297,7 +317,45 @@ socket.on('connect',async ()=>{
             
             showConfirmButton:false
         });
-    })
-    
+    });
+    socket.on("errorInRequest",(data)=>{
+        swal.fire({
+            icon: 'error',
+            title: data.msg,
+            timer: 500,
+            
+            showConfirmButton:false
+        });
+    });
+    socket.on("gameEnd",(data)=>{
+        if(data.gameId != gameId)return;
+        if(data.playerId == playerId){
+            swal.fire({
+                icon: 'success',
+                title:"congtatulations!! You Won"
+
+            });
+        }else{
+            swal.fire({
+                icon: 'info',
+                title:"game ended"
+
+            });
+        }
+        
+    });
+    socket.on("uno",(data)=>{
+        if(data.gameId != gameId)return;
+        
+            swal.fire({
+                icon: 'warning',
+                title:"UNO",
+                timer:500,
+                showConfirmButton:false
+
+            });
+        
+        
+    });
 });
 

@@ -82,9 +82,22 @@ min-width: 100%;
  }
 .turn{
     transform: scale(1.1);
+    color: #ecf0f1 !important;
+    background-color: #2c3e50 !important;
+}
+.turn .badge{
+    transform: scale(1.1);
+    color: #ecf0f1 !important;
+    background-color: #2c3e50 !important;
+}
+.turn::after{
+    content: " (current turn)";
 }
 .current{
     font-weight: bold;
+}
+.current::after{
+    content: " (You)";
 }
 select{
 display: block;
@@ -92,6 +105,15 @@ display: block;
 </style>
 </head>
 <body>
+    <div id="method" class="modal">
+        <div class="modal-content">
+          <h4>How do you want to play cards?</h4>
+        </div>
+        <div class="modal-footer">
+          <a href="#!" class="modal-close waves-effect waves-green btn-flat" id="snglClickBtn">click</a>
+          <a href="#!" class="modal-close waves-effect waves-green btn-flat" id="dblClickBtn">double click</a>
+        </div>
+      </div>
     <div id="modal1" class="modal">
         <div class="modal-content">
           <h4>welcome to uno multiplayer</h4>
@@ -163,12 +185,13 @@ display: block;
         <div class="board">
 
         </div>
-        <div class="col" style="text-align: center;">
-
-        </div>
+        
     </div>
   
     <div class="deck-wrapper">
+        <div class="col" style="text-align: center;">
+
+        </div>
         <div class="deck">
             <div class="frame owl-carousel owl-theme carousel" id="frame">
 

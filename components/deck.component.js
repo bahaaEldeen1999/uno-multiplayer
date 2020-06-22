@@ -2,26 +2,28 @@
 class Deck extends React.Component{
     cards;
     carouselOption = {
-        margin:5,
-        nav:false,
+        margin:2,
+        nav:true,
         responsive:{
             0:{
                 items:1,
                 nav:true
             },
+            100:{
+                items:2,
+                nav:true,
+            },
             600:{
                 items:5,
-                nav:false
+                nav:true,
             },
             1000:{
                 items:9,
                 nav:true,
-                loop:false
             },
             2000:{
                 items:19,
                 nav:true,
-                loop:false
             }
         }
    

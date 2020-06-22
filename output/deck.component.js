@@ -15,26 +15,28 @@ var Deck = function (_React$Component) {
         var _this = _possibleConstructorReturn(this, (Deck.__proto__ || Object.getPrototypeOf(Deck)).call(this, props));
 
         _this.carouselOption = {
-            margin: 5,
-            nav: false,
+            margin: 2,
+            nav: true,
             responsive: {
                 0: {
                     items: 1,
                     nav: true
                 },
+                100: {
+                    items: 2,
+                    nav: true
+                },
                 600: {
                     items: 5,
-                    nav: false
+                    nav: true
                 },
                 1000: {
                     items: 9,
-                    nav: true,
-                    loop: false
+                    nav: true
                 },
                 2000: {
                     items: 19,
-                    nav: true,
-                    loop: false
+                    nav: true
                 }
             }
 
