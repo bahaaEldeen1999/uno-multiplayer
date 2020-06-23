@@ -387,5 +387,18 @@ socket.on('connect',async ()=>{
         
         
     });
+    socket.on("playerDiconnnected",(data)=>{
+        if(data.gameId != gameId)return;
+        
+            swal.fire({
+                icon: 'warning',
+                title:"player "+data.playerName+" is diconnected",
+                timer:1000,
+                showConfirmButton:false
+
+            });
+        
+        
+    });
 });
 

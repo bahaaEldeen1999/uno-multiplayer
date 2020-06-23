@@ -39,7 +39,6 @@ app.get('/', (req, res) => {
     res.sendFile(path_1.default.join(__dirname, "index.html"));
 });
 io.on("connection", (socket) => {
-    console.log("connected");
     socket.on("createGame", (data) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             if (!data.name || data.number === undefined || !data.playerId)
@@ -48,7 +47,8 @@ io.on("connection", (socket) => {
                 players: [{
                         name: data.name,
                         index: data.number,
-                        playerId: data.playerId
+                        playerId: data.playerId,
+                        socketId: socket.id
                     }],
                 currentPlayerTurn: 0,
                 gameStart: false,
@@ -60,6 +60,8 @@ io.on("connection", (socket) => {
                 gameId: newGame._id,
                 playerId: data.playerId
             });
+            // set gameid property on the socket object
+            socket.gameId = newGame._id;
         }
         catch (err) {
             socket.emit("errorInRequest", { msg: err.message });
@@ -78,8 +80,11 @@ io.on("connection", (socket) => {
             game.players.push({
                 name: data.name,
                 index: index,
-                playerId: data.playerId
+                playerId: data.playerId,
+                socketId: socket.id
             });
+            // set gameid property on the socket object
+            socket.gameId = game._id;
             let players = [];
             for (let player of game.players) {
                 players.push({
@@ -132,7 +137,7 @@ io.on("connection", (socket) => {
                 currenColor: game.currentColor
             });
             for (let player of game.players) {
-                io.sockets.emit("getCards", {
+                io.to(player.socketId).emit("getCards", {
                     playerId: player.playerId,
                     cards: player.cards,
                     gameId: data.gameId
@@ -184,7 +189,7 @@ io.on("connection", (socket) => {
             if (game.players[data.playerIndex].cards.length == 1)
                 uno = true;
             for (let player of game.players) {
-                io.sockets.emit("getCards", {
+                io.to(player.socketId).emit("getCards", {
                     playerId: player.playerId,
                     cards: player.cards,
                     gameId: data.gameId
@@ -271,7 +276,7 @@ io.on("connection", (socket) => {
             });
             // update each on cards
             for (let player of game.players) {
-                io.sockets.emit("getCards", {
+                io.to(player.socketId).emit("getCards", {
                     playerId: player.playerId,
                     cards: player.cards,
                     gameId: data.gameId
@@ -307,7 +312,12 @@ io.on("connection", (socket) => {
                 });
                 // update each on cards
                 for (let player of game.players) {
-                    io.sockets.emit("getCards", {
+                    // io.sockets.emit("getCards", {
+                    //   playerId: player.playerId,
+                    //   cards: player.cards,
+                    //   gameId:data.gameId
+                    // });
+                    io.to(player.socketId).emit("getCards", {
                         playerId: player.playerId,
                         cards: player.cards,
                         gameId: data.gameId
@@ -320,6 +330,51 @@ io.on("connection", (socket) => {
         }
         catch (err) {
             socket.emit("errorInRequest", { msg: err });
+        }
+    }));
+    socket.on('disconnect', () => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const socketId = socket.id;
+            const gameId = socket.gameId;
+            const game = yield db_model_1.gameModel.findById(gameId);
+            if (!game)
+                return;
+            let player;
+            // remove this player from the game
+            for (let i = 0; i < game.players.length; i++) {
+                if (game.players[i].socketId == socketId) {
+                    player = game.players[i];
+                    if (game.players[i].index == game.currentPlayerTurn) {
+                        yield gameController.calculateNextTurn(game);
+                    }
+                    game.players.splice(i, 1);
+                    game.numberOfPlayers -= 1;
+                    break;
+                }
+            }
+            yield game.save();
+            io.sockets.emit("playerDiconnnected", {
+                gameId: gameId,
+                playerName: player.name
+            });
+            let players = [];
+            for (let player of game.players) {
+                players.push({
+                    name: player.name,
+                    index: player.index,
+                    number: player.cards.length
+                });
+            }
+            io.sockets.emit("gameUpdated", {
+                gameId: gameId,
+                players: players,
+                currentCard: game.currentCard,
+                currentPlayerTurn: game.currentPlayerTurn,
+                currenColor: game.currentColor
+            });
+        }
+        catch (err) {
+            socket.emit("errorInRequest", { msg: err.message });
         }
     }));
 });

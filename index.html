@@ -235,7 +235,11 @@ display: block;
     <script>
         // let height = document.querySelector(".content").scrollHeight-200;
         // document.querySelector(".board").style.height = `${height}px`;
-        const socket = io('/');
+        const socket = io({
+  query: {
+    token: 'cde'
+  }
+});
       
     </script>
     <script src="card.component.js"></script>

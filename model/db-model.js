@@ -17,7 +17,8 @@ const playerSchema = new Schema({
     index: Number,
     playerId: String,
     drawCard: Boolean,
-    canEnd: Boolean
+    canEnd: Boolean,
+    socketId: String
 });
 const gameSchema = new Schema({
     players: [playerSchema],
