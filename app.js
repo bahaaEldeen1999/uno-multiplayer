@@ -49,7 +49,8 @@ io.on("connection", (socket) => {
                         index: data.number,
                         playerId: data.playerId,
                         socketId: socket.id,
-                        drawCard: 0
+                        drawCard: 0,
+                        score: 0
                     }],
                 currentPlayerTurn: 0,
                 gameStart: false,
@@ -83,7 +84,8 @@ io.on("connection", (socket) => {
                 index: index,
                 playerId: data.playerId,
                 socketId: socket.id,
-                drawCard: 0
+                drawCard: 0,
+                score: 0
             });
             // set gameid property on the socket object
             socket.gameId = game._id;
@@ -130,7 +132,8 @@ io.on("connection", (socket) => {
                 players.push({
                     name: player.name,
                     index: player.index,
-                    number: player.cards.length
+                    number: player.cards.length,
+                    score: player.score
                 });
             }
             for (let player of game.players) {
@@ -180,7 +183,8 @@ io.on("connection", (socket) => {
                 players.push({
                     name: player.name,
                     index: player.index,
-                    number: player.cards.length
+                    number: player.cards.length,
+                    score: player.score
                 });
             }
             for (let player of game.players) {
@@ -265,7 +269,8 @@ io.on("connection", (socket) => {
                 players.push({
                     name: player.name,
                     index: player.index,
-                    number: player.cards.length
+                    number: player.cards.length,
+                    score: player.score
                 });
             }
             for (let player of game.players) {
@@ -302,7 +307,8 @@ io.on("connection", (socket) => {
                 players.push({
                     name: player.name,
                     index: player.index,
-                    number: player.cards.length
+                    number: player.cards.length,
+                    score: player.score
                 });
             }
             for (let player of game.players) {
@@ -340,7 +346,8 @@ io.on("connection", (socket) => {
                     players.push({
                         name: player.name,
                         index: player.index,
-                        number: player.cards.length
+                        number: player.cards.length,
+                        score: player.score
                     });
                 }
                 for (let player of game.players) {
@@ -381,12 +388,12 @@ io.on("connection", (socket) => {
             for (let i = 0; i < game.players.length; i++) {
                 if (game.players[i].socketId == socketId) {
                     player = game.players[i];
-                    if (game.gameStart) {
-                        if (game.players[i].index == game.currentPlayerTurn) {
+                    if (game.players[i].index == game.currentPlayerTurn) {
+                        if (game.gameStart) {
                             yield gameController.calculateNextTurn(game);
                         }
+                        game.players.splice(i, 1);
                     }
-                    game.players.splice(i, 1);
                     game.numberOfPlayers = game.players.length;
                     if (game.numberOfPlayers == 0) {
                         // delete game from db
@@ -406,7 +413,8 @@ io.on("connection", (socket) => {
                 players.push({
                     name: player.name,
                     index: player.index,
-                    number: player.cards.length
+                    number: player.cards.length,
+                    score: player.score
                 });
             }
             if (game.gameStart) {
@@ -447,6 +455,7 @@ io.on("connection", (socket) => {
                 playerName: name,
                 message: data.message
             });
+            yield game.save();
             // emit the message to all players in the room 
             for (let player of game.players) {
                 io.to(player.socketId).emit("messageRecieve", {

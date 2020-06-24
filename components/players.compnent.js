@@ -28,7 +28,7 @@ class Players extends React.Component{
                         if(this.currentTurn == index) classNames += " turn";
 
                         return (
-                        <li className={classNames} ><span className="badge" >{player.number}</span> {player.name}</li>
+                        <li className={classNames} ><span className="badge" >{player.number}</span> <span className="badge" >{player.score}</span> {player.name}</li>
                         )
  
                         

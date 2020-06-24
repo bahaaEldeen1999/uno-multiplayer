@@ -53,6 +53,12 @@ var Players = function (_React$Component) {
                             player.number
                         ),
                         " ",
+                        React.createElement(
+                            "span",
+                            { className: "badge" },
+                            player.score
+                        ),
+                        " ",
                         player.name
                     );
                 })

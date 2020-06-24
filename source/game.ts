@@ -71,10 +71,20 @@ class Game {
       return 7;
     }
     if (ruleNumber == 1) {
+      game.players[game.currentPlayerTurn].score += 20;
+      if (game.players[game.currentPlayerTurn].score >= 500) {
+        await game.save();
+        return 7;
+      }
       this.calculateNextTurn(game);
       await game.save();
       return 1;
     } else if (ruleNumber == 2) {
+      game.players[game.currentPlayerTurn].score += 20;
+      if (game.players[game.currentPlayerTurn].score >= 500) {
+        await game.save();
+        return 7;
+      }
       this.calculateNextTurn(game);
       // draw 2 cards for the next player
       this.addCard(game,this.deck.drawCard());
@@ -82,6 +92,11 @@ class Game {
       await game.save();
       return 2;
     } else if (ruleNumber == 3) {
+      game.players[game.currentPlayerTurn].score += 20;
+      if (game.players[game.currentPlayerTurn].score >= 500) {
+        await game.save();
+        return 7;
+      }
       // skip player
       this.calculateNextTurn(game);
       this.calculateNextTurn(game);
@@ -89,6 +104,11 @@ class Game {
       await game.save();
       return 5;
     } else if (ruleNumber == 4) {
+      game.players[game.currentPlayerTurn].score += 20;
+      if (game.players[game.currentPlayerTurn].score >= 500) {
+        await game.save();
+        return 7;
+      }
       // reverse 
       // reverse work as skip in case of 2 players 
       if (game.numberOfPlayers > 2) {
@@ -98,10 +118,19 @@ class Game {
       await game.save();
       return 6;
     } else if (ruleNumber == 5) {
-
+      game.players[game.currentPlayerTurn].score += 50;
+      if (game.players[game.currentPlayerTurn].score >= 500) {
+        await game.save();
+        return 7;
+      }
       await game.save();
       return 3;
     } else if (ruleNumber == 6) {
+      game.players[game.currentPlayerTurn].score += 50;
+      if (game.players[game.currentPlayerTurn].score >= 500) {
+        await game.save();
+        return 7;
+      }
       this.calculateNextTurn(game);
       // +4 current user
       this.addCard(game,this.deck.drawCard());

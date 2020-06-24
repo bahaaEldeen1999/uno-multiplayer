@@ -6,7 +6,6 @@ let playerIndex = undefined;
 let host = undefined;
 let playerId = "";
 let showQueue = false;
-let drawCard = false;
 let mainThemeAudio = new Audio('audio/theme.mp3');
 mainThemeAudio.loop = true;
 mainThemeAudio.volume = .2;
@@ -123,6 +122,7 @@ socket.on('connect',async ()=>{
         showGameId.innerText = "gameId";
         showGameId.addEventListener("click",()=>{
             swal.fire({
+               confirmButtonColor:"#2c3e50",
                 icon: 'info',
                 title: "your game id is : "+gameId,      
                 showConfirmButton:true
@@ -187,6 +187,7 @@ socket.on('connect',async ()=>{
                 modalJoin.open();
              },20);
              swal.fire({
+               confirmButtonColor:"#2c3e50",
                 icon: 'error',
                 title: "please enter valid game id",      
                 showConfirmButton:false,
@@ -211,6 +212,7 @@ socket.on('connect',async ()=>{
                 showGameId.innerText = "gameId";
                 showGameId.addEventListener("click",()=>{
                     swal.fire({
+               confirmButtonColor:"#2c3e50",
                         icon: 'info',
                         title: "your game id is : "+gameId,      
                         showConfirmButton:true
@@ -271,7 +273,8 @@ socket.on('connect',async ()=>{
         for(let player of data.players){
             players.push({
                 name: player.name,
-                number: player.number
+                number: player.number,
+                score:player.score
             });
         }
         
@@ -297,8 +300,6 @@ socket.on('connect',async ()=>{
         endTurnBtn.className = "waves-effect waves-light btn";
         endTurnBtn.innerText = "end turn";
         drawBtn.addEventListener("click",()=>{
-            if(drawCard)return;
-            drawCard = 1;
             socket.emit("drawCard",{
                 gameId:gameId,
                 playerId:playerId,
@@ -319,6 +320,7 @@ socket.on('connect',async ()=>{
         if(gameId != data.gameId) return;
         if(playerIndex == data.currentPlayerTurn && !data.cardDrawn){
             swal.fire({
+               confirmButtonColor:"#2c3e50",
                 icon: 'info',
                 title: 'Your Turn',
                 timer: 500,
@@ -326,16 +328,15 @@ socket.on('connect',async ()=>{
                 showConfirmButton:false
             });
         }
-        drawCard = 0;
         ReactDOM.unmountComponentAtNode(document.querySelector(".players ul"))
         ReactDOM.unmountComponentAtNode(document.querySelector(".board"))
         ReactDOM.unmountComponentAtNode(document.querySelector("#queue"))
         players = [];
-
         for(let player of data.players){
             players.push({
                 name: player.name,
-                number: player.number
+                number: player.number,
+                score:player.score
             });
         }
         
@@ -373,7 +374,6 @@ socket.on('connect',async ()=>{
         let cardsDoc = document.querySelectorAll(".card-deck");
         cardsDoc.forEach(card =>{
             card.addEventListener(methodClick,(e)=>{
-                drawCard = 0;
                 let data = {
                     gameId:gameId,
                     playerIndex:playerIndex,
@@ -420,6 +420,7 @@ socket.on('connect',async ()=>{
     socket.on("wrongMove",(data)=>{
         if(data.gameId != gameId || data.playerId != playerId)return;
         swal.fire({
+               confirmButtonColor:"#2c3e50",
             icon: 'error',
             title: 'invalid move',
             timer: 500,
@@ -430,6 +431,7 @@ socket.on('connect',async ()=>{
     socket.on("wrongTurn",(data)=>{
         if(data.gameId != gameId || data.playerId != playerId)return;
         swal.fire({
+               confirmButtonColor:"#2c3e50",
             icon: 'error',
             title: 'wait your turn',
             timer: 500,
@@ -441,6 +443,7 @@ socket.on('connect',async ()=>{
     socket.on("cannotDraw",(data)=>{
         if(data.gameId != gameId || data.playerId != playerId)return;
         swal.fire({
+               confirmButtonColor:"#2c3e50",
             icon: 'error',
             title: 'cannot draw more cards this turn',
             timer: 500,
@@ -450,6 +453,7 @@ socket.on('connect',async ()=>{
     });
     socket.on("errorInRequest",(data)=>{
         swal.fire({
+               confirmButtonColor:"#2c3e50",
             icon: 'error',
             title: data.msg,
             timer: 500,
@@ -461,18 +465,24 @@ socket.on('connect',async ()=>{
         if(data.gameId != gameId)return;
         if(data.playerId == playerId){
             swal.fire({
+               confirmButtonColor:"#2c3e50",
                 icon: 'success',
-                title:"congtatulations!! You Won"
+                title:"congtatulations!! You Won",
+                onClose: function(){
+                    window.location.href = '/';
+                },
+                confirmButtonText:"reload"
 
             });
         }else{
             swal.fire({
+               confirmButtonColor:"#2c3e50",
                 icon: 'info',
                 title:"game ended",
                 onClose: function(){
                     window.location.href = '/';
-                }
-
+                },
+                confirmButtonText:"reload"
             });
         }
         
@@ -481,6 +491,7 @@ socket.on('connect',async ()=>{
         if(data.gameId != gameId)return;
         
             swal.fire({
+               confirmButtonColor:"#2c3e50",
                 icon: 'warning',
                 title:"UNO",
                 timer:500,
@@ -494,6 +505,7 @@ socket.on('connect',async ()=>{
         if(data.gameId != gameId)return;
         
             swal.fire({
+               confirmButtonColor:"#2c3e50",
                 icon: 'warning',
                 title:"player "+data.playerName+" is diconnected",
                 timer:1000,
@@ -507,6 +519,7 @@ socket.on('connect',async ()=>{
         if(data.gameId != gameId)return;
         
             swal.fire({
+               confirmButtonColor:"#2c3e50",
                 icon: 'warning',
                 title:"+2",
                 timer:500,
@@ -520,6 +533,7 @@ socket.on('connect',async ()=>{
         if(data.gameId != gameId)return;
         
             swal.fire({
+               confirmButtonColor:"#2c3e50",
                 icon: 'warning',
                 title:"+4",
                 timer:500,
@@ -534,6 +548,7 @@ socket.on('connect',async ()=>{
         if(data.gameId != gameId)return;
         
             swal.fire({
+               confirmButtonColor:"#2c3e50",
                 icon: 'warning',
                 title:"SKIP",
                 timer:500,
@@ -548,6 +563,7 @@ socket.on('connect',async ()=>{
         if(data.gameId != gameId)return;
         
             swal.fire({
+               confirmButtonColor:"#2c3e50",
                 icon: 'warning',
                 title:"REVERSE",
                 timer:500,
