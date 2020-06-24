@@ -319,8 +319,8 @@ io.on("connection", (socket) => {
     // update each on cards
 
       socket.emit("getCards", {
-        playerId: player.playerId,
-        cards: player.cards,
+        playerId: data.playerId,
+        cards: game.players[data.playerIndex].cards,
         gameId:data.gameId
       });
    
