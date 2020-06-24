@@ -91,15 +91,18 @@ io.on("connection", (socket) => {
         });
       }
       await game.save();
-      io.sockets.emit("joinedGame", {
+      socket.emit("joinedGame", {
         gameId: game._id,
         playerId: data.playerId,
         index: index
       });
-      io.sockets.emit("queueChanged", {
-        gameId: game._id,
-        players: players
-      });
+      for (let player of game.players) {
+        io.to(player.socketId).emit("queueChanged", {
+          gameId: game._id,
+          players: players
+        });
+      }
+      
     }catch(err){
       socket.emit("errorInRequest",{msg:err.message});
     }
@@ -126,14 +129,17 @@ io.on("connection", (socket) => {
         index: player.index,
         number:player.cards.length
       })
+      }
+    for (let player of game.players) { 
+      io.to(player.socketId).emit("gameCreated", {
+        gameId: data.gameId,
+        players: players,
+        currentCard: game.currentCard,
+        currentPlayerTurn: game.currentPlayerTurn,
+        currenColor:game.currentColor
+      });
     }
-    io.sockets.emit("gameCreated", {
-      gameId: data.gameId,
-      players: players,
-      currentCard: game.currentCard,
-      currentPlayerTurn: game.currentPlayerTurn,
-      currenColor:game.currentColor
-    });
+    
     for (let player of game.players) {
       io.to(player.socketId).emit("getCards", {
         playerId: player.playerId,
@@ -175,14 +181,17 @@ io.on("connection", (socket) => {
         index: player.index,
         number:player.cards.length
       })
-    }
-    io.sockets.emit("gameUpdated", {
-      gameId: data.gameId,
-      players: players,
-      currentCard: game.currentCard,
-      currentPlayerTurn: game.currentPlayerTurn,
-      currenColor:game.currentColor
-    });
+      }
+      for (let player of game.players) { 
+        io.to(player.socketId).emit("gameUpdated", {
+          gameId: data.gameId,
+          players: players,
+          currentCard: game.currentCard,
+          currentPlayerTurn: game.currentPlayerTurn,
+          currenColor:game.currentColor
+        });
+      }
+   
     // update each on cards
       let uno = false;
       if (game.players[data.playerIndex].cards.length == 1) uno = true;
@@ -195,10 +204,13 @@ io.on("connection", (socket) => {
       
       }
       if (uno) {
-        io.sockets.emit("uno", {
+        for (let player of game.players) { 
+          io.to(player.socketId).emit("uno", {
           
-          gameId: data.gameId
-        });
+            gameId: data.gameId
+          });
+        }
+        
       }
      if (isPlayed == 2) {
       io.to(game.players[game.currentPlayerTurn].socketId).emit("drawTwo", {
@@ -252,15 +264,18 @@ io.on("connection", (socket) => {
         index: player.index,
         number: player.cards.length
       })
-    }
-    io.sockets.emit("gameUpdated", {
-      gameId: data.gameId,
-      players: players,
-      currentCard: game.currentCard,
-      currentPlayerTurn: game.currentPlayerTurn,
-      currenColor: game.currentColor,
-      cardDrawn:true
-    });
+      }
+      for (let player of game.players) { 
+        io.to(player.socketId).emit("gameUpdated", {
+          gameId: data.gameId,
+          players: players,
+          currentCard: game.currentCard,
+          currentPlayerTurn: game.currentPlayerTurn,
+          currenColor: game.currentColor,
+          cardDrawn:true
+        });
+      }
+    
   }catch(err){
     socket.emit("errorInRequest",{msg:err.message});
   }
@@ -289,25 +304,27 @@ io.on("connection", (socket) => {
         index: player.index,
         number: player.cards.length
       })
-    }
-    io.sockets.emit("gameUpdated", {
-      gameId: data.gameId,
-      players: players,
-      currentCard: game.currentCard,
-      currentPlayerTurn: game.currentPlayerTurn,
-      currenColor: game.currentColor,
-      cardDrawn:true
-    });
-    // update each on cards
+      }
+      for (let player of game.players) { 
+        io.to(player.socketId).emit("gameUpdated", {
+          gameId: data.gameId,
+          players: players,
+          currentCard: game.currentCard,
+          currentPlayerTurn: game.currentPlayerTurn,
+          currenColor: game.currentColor,
+          cardDrawn:true
+        });
+      }
     
-    for (let player of game.players) {
-      io.to(player.socketId).emit("getCards", {
+    // update each on cards
+
+      socket.emit("getCards", {
         playerId: player.playerId,
         cards: player.cards,
         gameId:data.gameId
       });
    
-      }
+      
     } catch (err) {
       console.log(err);
     socket.emit("errorInRequest",{msg:err.message});
@@ -330,13 +347,16 @@ io.on("connection", (socket) => {
             number: player.cards.length
           })
         }
-        io.sockets.emit("gameUpdated", {
-          gameId: data.gameId,
-          players: players,
-          currentCard: game.currentCard,
-          currentPlayerTurn: game.currentPlayerTurn,
-          currenColor: game.currentColor
-        });
+        for (let player of game.players) { 
+          io.to(player.socketId).emit("gameUpdated", {
+            gameId: data.gameId,
+            players: players,
+            currentCard: game.currentCard,
+            currentPlayerTurn: game.currentPlayerTurn,
+            currenColor: game.currentColor
+          });
+        }
+        
         // update each on cards
   
     for (let player of game.players) {
@@ -377,6 +397,11 @@ io.on("connection", (socket) => {
         } 
         game.players.splice(i, 1);
         game.numberOfPlayers = game.players.length;
+        if (game.numberOfPlayers == 0) {
+          // delete game from db
+          await gameModel.findByIdAndDelete(gameId);
+          return;
+        }
         break;
       }
     }
@@ -395,18 +420,23 @@ io.on("connection", (socket) => {
           })
       }
       if (game.gameStart) {
-        io.sockets.emit("gameUpdated", {
-          gameId: gameId,
-          players: players,
-          currentCard: game.currentCard,
-          currentPlayerTurn: game.currentPlayerTurn,
-          currenColor: game.currentColor
-        });
+        for (let player of game.players) { 
+          io.to(player.socketId).emit("gameUpdated", {
+            gameId: gameId,
+            players: players,
+            currentCard: game.currentCard,
+            currentPlayerTurn: game.currentPlayerTurn,
+            currenColor: game.currentColor
+          });
+        }
+        
       } else {
-        io.sockets.emit("queueChanged", {
-          gameId: game._id,
-          players: players
-        });
+        for (let player of game.players) {
+          io.to(player.socketId).emit("queueChanged", {
+            gameId: game._id,
+            players: players
+          });
+        }
       }
         
     } catch (err) {

@@ -408,7 +408,10 @@ socket.on('connect',async ()=>{
         }else{
             swal.fire({
                 icon: 'info',
-                title:"game ended"
+                title:"game ended",
+                onClose: function(){
+                    window.location.href = '/';
+                }
 
             });
         }
