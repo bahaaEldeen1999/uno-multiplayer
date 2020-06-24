@@ -14,7 +14,8 @@ const playerSchema = new Schema({
   playerId: String,
   drawCard: Number,
   canEnd: Boolean,
-  socketId: String
+  socketId: String,
+  score: Number
 });
 const chatSchema = new Schema({
   playerName: String,

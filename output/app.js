@@ -7,6 +7,9 @@ let host = undefined;
 let playerId = "";
 let showQueue = false;
 let drawCard = false;
+let mainThemeAudio = new Audio('audio/theme.mp3');
+mainThemeAudio.loop = true;
+mainThemeAudio.volume = .2;
 let contentBG = document.querySelector("body");
 let colorMap = {
     "red":"#ff5555",
@@ -48,11 +51,13 @@ socket.on('connect',async ()=>{
     let snglClickBtn = document.querySelector("#snglClickBtn");   
     method.open();
     dblClickBtn.addEventListener('click',()=>{
+        mainThemeAudio.play();
         methodClick = "dblclick";
         method.close();
         modal1.open();
     });
     snglClickBtn.addEventListener('click',()=>{
+        mainThemeAudio.play();
         methodClick = "click";
         method.close();
         modal1.open();
@@ -148,6 +153,7 @@ socket.on('connect',async ()=>{
                   playerName:playerName,
                   message:text
               });
+              
             }
         });
         chatInputDiv.appendChild(chatInputTextarea);
@@ -235,6 +241,7 @@ socket.on('connect',async ()=>{
                         playerName:playerName,
                         message:text
                     });
+                    
                     }
                 });
                 chatInputDiv.appendChild(chatInputTextarea);
