@@ -13,7 +13,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const deck_1 = __importDefault(require("./deck"));
-const player_1 = __importDefault(require("./player"));
 const rules_1 = __importDefault(require("./rules"));
 const db_model_1 = require("../model/db-model");
 class Game {
@@ -27,7 +26,6 @@ class Game {
                 throw new Error("can't start a game with less than 2 players");
             const game = yield db_model_1.gameModel.findById(gameId);
             for (let i = 0; i < numberOfPlayers; i++) {
-                let player = new player_1.default(players[i].name, players[i].index);
                 // draw 7 cards for each player 
                 for (let j = 0; j < 7; j++) {
                     let card = this.deck.drawCard();
@@ -42,19 +40,17 @@ class Game {
         });
     }
     calculateNextTurn(game) {
-        return __awaiter(this, void 0, void 0, function* () {
-            game.players[game.currentPlayerTurn].drawCard = false;
-            game.players[game.currentPlayerTurn].canEnd = false;
-            if (game.isReversed && game.currentPlayerTurn == 0)
-                game.currentPlayerTurn = game.numberOfPlayers - 1;
-            else {
-                if (game.isReversed)
-                    game.currentPlayerTurn--;
-                else
-                    game.currentPlayerTurn = (game.currentPlayerTurn + 1) % game.numberOfPlayers;
-            }
-            game.players[game.currentPlayerTurn].canEnd = false;
-        });
+        game.players[game.currentPlayerTurn].drawCard = 0;
+        game.players[game.currentPlayerTurn].canEnd = false;
+        if (game.isReversed && game.currentPlayerTurn == 0)
+            game.currentPlayerTurn = game.numberOfPlayers - 1;
+        else {
+            if (game.isReversed)
+                game.currentPlayerTurn--;
+            else
+                game.currentPlayerTurn = (game.currentPlayerTurn + 1) % game.numberOfPlayers;
+        }
+        game.players[game.currentPlayerTurn].canEnd = false;
     }
     addCard(game, card) {
         game.players[game.currentPlayerTurn].cards.push(card);
@@ -66,8 +62,12 @@ class Game {
      * -1 => not your turn
      * 0 => false
      * 1 => true
-     * 2 => game end
+     * 2 => +2
+     * 4 => +4
      * 3 => choose color
+     * 5 => skip
+     * 6 => inverse
+     * 7 => game end
      */
     play(gameId, playerIndex, cardIndex, card, playerId) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -76,7 +76,7 @@ class Game {
             const game = yield db_model_1.gameModel.findById(gameId);
             if (game.currentPlayerTurn != playerIndex || game.players[game.currentPlayerTurn].playerId != playerId)
                 return -1;
-            game.players[game.currentPlayerTurn].drawCard = false;
+            game.players[game.currentPlayerTurn].drawCard = 0;
             let rule = new rules_1.default(game.currentCard, card, game.currentColor);
             let ruleNumber = rule.getRule();
             if (!ruleNumber)
@@ -87,21 +87,27 @@ class Game {
             this.removeCard(game, cardIndex);
             if (game.players[game.currentPlayerTurn].cards.length == 0) {
                 yield game.save();
-                return 2;
+                return 7;
             }
             if (ruleNumber == 1) {
                 this.calculateNextTurn(game);
+                yield game.save();
+                return 1;
             }
             else if (ruleNumber == 2) {
                 this.calculateNextTurn(game);
                 // draw 2 cards for the next player
                 this.addCard(game, this.deck.drawCard());
                 this.addCard(game, this.deck.drawCard());
+                yield game.save();
+                return 2;
             }
             else if (ruleNumber == 3) {
                 // skip player
                 this.calculateNextTurn(game);
                 this.calculateNextTurn(game);
+                yield game.save();
+                return 5;
             }
             else if (ruleNumber == 4) {
                 // reverse 
@@ -110,6 +116,8 @@ class Game {
                     game.isReversed = !game.isReversed;
                     this.calculateNextTurn(game);
                 }
+                yield game.save();
+                return 6;
             }
             else if (ruleNumber == 5) {
                 yield game.save();
@@ -126,10 +134,8 @@ class Game {
                 this.calculateNextTurn(game);
                 game.isReversed = !game.isReversed;
                 yield game.save();
-                return 3;
+                return 4;
             }
-            yield game.save();
-            return 1;
         });
     }
     changCurrentColor(gameId, color, playerIndex, playerId) {
@@ -153,11 +159,12 @@ class Game {
             const game = yield db_model_1.gameModel.findById(gameId);
             if (!game)
                 return 0;
-            if (game.currentPlayerTurn != playerIndex || game.players[playerIndex].drawCard == 1 || game.players[playerIndex].playerId != playerId)
+            if (game.currentPlayerTurn != playerIndex || game.players[playerIndex].drawCard >= 2 || game.players[playerIndex].playerId != playerId)
                 return 0;
             game.players[playerIndex].cards.push(this.deck.drawCard());
-            game.players[playerIndex].drawCard = true;
-            game.players[playerIndex].canEnd = true;
+            game.players[playerIndex].drawCard++;
+            if (game.players[playerIndex].drawCard == 2)
+                game.players[playerIndex].canEnd = true;
             yield game.save();
             return 1;
         });

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.cardModel = exports.playerModel = exports.gameModel = void 0;
+exports.chatModel = exports.cardModel = exports.playerModel = exports.gameModel = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const Schema = mongoose_1.default.Schema;
 const cardSchema = new Schema({
@@ -16,9 +16,13 @@ const playerSchema = new Schema({
     name: String,
     index: Number,
     playerId: String,
-    drawCard: Boolean,
+    drawCard: Number,
     canEnd: Boolean,
     socketId: String
+});
+const chatSchema = new Schema({
+    playerName: String,
+    message: String
 });
 const gameSchema = new Schema({
     players: [playerSchema],
@@ -27,7 +31,8 @@ const gameSchema = new Schema({
     currentColor: String,
     isReversed: Boolean,
     gameStart: Boolean,
-    numberOfPlayers: Number
+    numberOfPlayers: Number,
+    chat: [chatSchema]
 });
 const gameModel = mongoose_1.default.model("Game", gameSchema);
 exports.gameModel = gameModel;
@@ -35,3 +40,5 @@ const playerModel = mongoose_1.default.model("Player", playerSchema);
 exports.playerModel = playerModel;
 const cardModel = mongoose_1.default.model("Card", cardSchema);
 exports.cardModel = cardModel;
+const chatModel = mongoose_1.default.model("Chat", chatSchema);
+exports.chatModel = chatModel;

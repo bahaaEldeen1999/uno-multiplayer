@@ -12,11 +12,14 @@ const playerSchema = new Schema({
   name: String,
   index: Number,
   playerId: String,
-  drawCard: Boolean,
+  drawCard: Number,
   canEnd: Boolean,
   socketId: String
 });
-
+const chatSchema = new Schema({
+  playerName: String,
+  message:String
+});
 const gameSchema = new Schema({
   players: [playerSchema],
   currentPlayerTurn: Number,
@@ -24,12 +27,14 @@ const gameSchema = new Schema({
   currentColor: String,
   isReversed: Boolean,
   gameStart: Boolean,
-  numberOfPlayers:Number
+  numberOfPlayers: Number,
+  chat:[chatSchema]
   
 });
 
 const gameModel = mongoose.model("Game", gameSchema);
 const playerModel = mongoose.model("Player", playerSchema);
 const cardModel = mongoose.model("Card", cardSchema);
+const chatModel = mongoose.model("Chat", chatSchema);
 
-export  {gameModel,playerModel,cardModel};
+export  {gameModel,playerModel,cardModel,chatModel};

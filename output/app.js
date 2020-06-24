@@ -23,8 +23,8 @@ socket.on('connect',async ()=>{
     console.log("connected client");
     // create the choosing window to be host or join
     let modalOptions = {
-        inDuration:100,
-        outDuration:100,
+        inDuration:10,
+        outDuration:10,
         dismissible:false
     }
     $('#modal1').modal(modalOptions);
@@ -119,7 +119,47 @@ socket.on('connect',async ()=>{
                 showConfirmButton:true
             });
         });
+        // intialize chat button 
+        let sideNavChat = document.createElement('ul');
+        sideNavChat.innerText = "<h1>hi</hi>";
+        sideNavChat.className = "sidenav";
+        sideNavChat.id = "chat-slide";
+        let chatInputDiv = document.createElement('div');
+        chatInputDiv.className = "input-field col s12";
+        let chatInputTextarea = document.createElement('textarea');
+        chatInputTextarea.className = "materialize-textarea";
+        chatInputTextarea.setAttribute("placeholder","enter your message");
+        chatInputTextarea.addEventListener('keypress', function (e) {
+           
+            if (e.key === 'Enter') {
+                e.preventDefault();
+              // send the message
+              let text = chatInputTextarea.value;
+              if(!text) return;
+              chatInputTextarea.value = "";
+              console.log(text)
+            }
+        });
+        chatInputDiv.appendChild(chatInputTextarea);
+        sideNavChat.appendChild(chatInputTextarea);
+        /**
+         * div class="input-field col s12">
+          <textarea id="textarea1" class="materialize-textarea"></textarea>
+          <label for="textarea1">Textarea</label>
+        </div>
+         */
+        document.body.appendChild(sideNavChat);
+        let sideNavchatInstance =  M.Sidenav.init(document.querySelectorAll('.sidenav'),{
+            inDuration:10,
+            outDuration:10
+        });
+        let showChatBtn = document.createElement('a');
+        showChatBtn.className = "sidenav-trigger btn"
+        showChatBtn.innerText = "chat";
+        showChatBtn.setAttribute("data-target","chat-slide")
         document.body.appendChild(showGameId);
+        
+        document.body.appendChild(showChatBtn);
 
 
     })
@@ -394,6 +434,60 @@ socket.on('connect',async ()=>{
                 icon: 'warning',
                 title:"player "+data.playerName+" is diconnected",
                 timer:1000,
+                showConfirmButton:false
+
+            });
+        
+        
+    });
+    socket.on("drawTwo",(data)=>{
+        if(data.gameId != gameId)return;
+        
+            swal.fire({
+                icon: 'warning',
+                title:"+2",
+                timer:500,
+                showConfirmButton:false
+
+            });
+        
+        
+    });
+    socket.on("drawFour",(data)=>{
+        if(data.gameId != gameId)return;
+        
+            swal.fire({
+                icon: 'warning',
+                title:"+4",
+                timer:500,
+                showConfirmButton:false
+
+            });
+        
+        
+    });
+
+    socket.on("skipTurn",(data)=>{
+        if(data.gameId != gameId)return;
+        
+            swal.fire({
+                icon: 'warning',
+                title:"SKIP",
+                timer:500,
+                showConfirmButton:false
+
+            });
+        
+        
+    });
+
+    socket.on("reverseTurn",(data)=>{
+        if(data.gameId != gameId)return;
+        
+            swal.fire({
+                icon: 'warning',
+                title:"REVERSE",
+                timer:500,
                 showConfirmButton:false
 
             });
