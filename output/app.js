@@ -25,7 +25,11 @@ socket.on('connect',async ()=>{
     let modalOptions = {
         inDuration:10,
         outDuration:10,
-        dismissible:false
+        dismissible:false,
+        onCloseEnd: function(e){
+            //console.log(e);
+            if(e.id != "modal5" && e.id != "modal4") e.remove();
+        }
     }
     $('#modal1').modal(modalOptions);
     $('#modal2').modal(modalOptions);
@@ -121,9 +125,11 @@ socket.on('connect',async ()=>{
         });
         // intialize chat button 
         let sideNavChat = document.createElement('ul');
-        sideNavChat.innerText = "<h1>hi</hi>";
         sideNavChat.className = "sidenav";
         sideNavChat.id = "chat-slide";
+        let chatBox = document.createElement('div');
+        chatBox.id = "chatBox";
+        sideNavChat.appendChild(chatBox)
         let chatInputDiv = document.createElement('div');
         chatInputDiv.className = "input-field col s12";
         let chatInputTextarea = document.createElement('textarea');
@@ -134,20 +140,18 @@ socket.on('connect',async ()=>{
             if (e.key === 'Enter') {
                 e.preventDefault();
               // send the message
-              let text = chatInputTextarea.value;
+              let text = chatInputTextarea.value.trim();
               if(!text) return;
               chatInputTextarea.value = "";
-              console.log(text)
+              socket.emit("chatMessage",{
+                  gameId:gameId,
+                  playerName:playerName,
+                  message:text
+              });
             }
         });
         chatInputDiv.appendChild(chatInputTextarea);
-        sideNavChat.appendChild(chatInputTextarea);
-        /**
-         * div class="input-field col s12">
-          <textarea id="textarea1" class="materialize-textarea"></textarea>
-          <label for="textarea1">Textarea</label>
-        </div>
-         */
+        sideNavChat.appendChild(chatInputDiv);
         document.body.appendChild(sideNavChat);
         let sideNavchatInstance =  M.Sidenav.init(document.querySelectorAll('.sidenav'),{
             inDuration:10,
@@ -156,10 +160,10 @@ socket.on('connect',async ()=>{
         let showChatBtn = document.createElement('a');
         showChatBtn.className = "sidenav-trigger btn"
         showChatBtn.innerText = "chat";
-        showChatBtn.setAttribute("data-target","chat-slide")
+        showChatBtn.setAttribute("data-target","chat-slide");
+        document.body.appendChild(showChatBtn);
         document.body.appendChild(showGameId);
         
-        document.body.appendChild(showChatBtn);
 
 
     })
@@ -169,9 +173,19 @@ socket.on('connect',async ()=>{
         modalJoin.open();
     }); 
     joinGameBtn.click(async ()=>{
+        
         if(!document.querySelector("#gameIdInput").value){
+            console.log(modalJoin)
             modalJoin.close();
-             modalJoin.open();
+             setTimeout(()=>{
+                modalJoin.open();
+             },20);
+             swal.fire({
+                icon: 'error',
+                title: "please enter valid game id",      
+                showConfirmButton:false,
+                timer:500
+             }) 
             }
         else{
             gameId = document.querySelector("#gameIdInput").value;
@@ -196,6 +210,45 @@ socket.on('connect',async ()=>{
                         showConfirmButton:true
                     });
                 });
+                // intialize chat button 
+                let sideNavChat = document.createElement('ul');
+                sideNavChat.className = "sidenav";
+                sideNavChat.id = "chat-slide";
+                let chatBox = document.createElement('div');
+                chatBox.id = "chatBox";
+                sideNavChat.appendChild(chatBox)
+                let chatInputDiv = document.createElement('div');
+                chatInputDiv.className = "input-field col s12";
+                let chatInputTextarea = document.createElement('textarea');
+                chatInputTextarea.className = "materialize-textarea";
+                chatInputTextarea.setAttribute("placeholder","enter your message");
+                chatInputTextarea.addEventListener('keypress', function (e) {
+                
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                    // send the message
+                    let text = chatInputTextarea.value.trim();
+                    if(!text) return;
+                    chatInputTextarea.value = "";
+                    socket.emit("chatMessage",{
+                        gameId:gameId,
+                        playerName:playerName,
+                        message:text
+                    });
+                    }
+                });
+                chatInputDiv.appendChild(chatInputTextarea);
+                sideNavChat.appendChild(chatInputDiv);
+                document.body.appendChild(sideNavChat);
+                let sideNavchatInstance =  M.Sidenav.init(document.querySelectorAll('.sidenav'),{
+                    inDuration:10,
+                    outDuration:10
+                });
+                let showChatBtn = document.createElement('a');
+                showChatBtn.className = "sidenav-trigger btn"
+                showChatBtn.innerText = "chat";
+                showChatBtn.setAttribute("data-target","chat-slide");
+                document.body.appendChild(showChatBtn);
                 document.body.appendChild(showGameId);
             });
         }
@@ -497,5 +550,14 @@ socket.on('connect',async ()=>{
         
         
     });
+
+    socket.on("messageRecieve",(data)=>{
+        if(data.gameId != gameId) return;
+        let navChat = document.querySelector('#chatBox');
+        let li = document.createElement("li");
+        li.innerText = `${data.playerName}: ${data.message}`;
+        navChat.appendChild(li);
+        navChat.scrollTop = navChat.scrollHeight
+    })
 });
 

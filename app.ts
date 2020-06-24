@@ -8,6 +8,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import {  gameModel  } from './model/db-model';
 import Player from './source/player';
+import { createCallChain } from 'typescript';
 
 dotenv.config();
 
@@ -447,10 +448,37 @@ io.on("connection", (socket) => {
     
   });
 
+  socket.on("chatMessage", async (data) => {
+    try {
+      let gameId = data.gameId;
+      let name = data.playerName;
+      if (!gameId || !name) throw new Error("not enough data");
+      const game = await gameModel.findById(gameId);
+      if(!game) throw new Error("no game with this id");
+      game.chat.push({
+        playerName: name,
+        message: data.message
+      });
+      await game.save();
+      // emit the message to all players in the room 
+      for (let player of game.players) {
+        io.to(player.socketId).emit("messageRecieve", {
+          gameId: game._id,
+          playerName: name,
+          message: data.message
+        });
+      }
+      
+    } catch (err) {
+      console.log(err);
+        socket.emit("errorInRequest",{msg:err.message});
+      }
+  })
+
 })
 
 
 
 
 
-server.listen(process.env.PORT|| PORT,()=>{console.log(`listening on port ${process.env.PORT|| PORT}`)})
+server.listen(process.env.PORT || PORT, () => { console.log(`listening on port ${process.env.PORT || PORT}`) });
