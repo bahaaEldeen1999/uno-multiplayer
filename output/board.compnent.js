@@ -30,7 +30,7 @@ var Board = function (_React$Component) {
         value: function render() {
             return React.createElement(
                 "div",
-                { "class": "board-card" },
+                { className: "board-card " + (this.props.animated ? this.props.animated : "") },
                 React.createElement(Card, { value: this.state.card.value, color: this.state.card.color, isSpecial: this.state.card.isSpecial })
             );
         }

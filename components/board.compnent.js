@@ -11,7 +11,7 @@ class Board extends React.Component{
     render(){
         return (
             
-            <div class="board-card">
+            <div className={`board-card ${this.props.animated?this.props.animated:""}`}  >
                  <Card  value={this.state.card.value} color={this.state.card.color} isSpecial={this.state.card.isSpecial} />
             </div>
         )

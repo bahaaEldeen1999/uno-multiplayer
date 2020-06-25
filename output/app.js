@@ -319,7 +319,9 @@ socket.on('connect',async ()=>{
         })
         document.querySelector(".col").appendChild(drawBtn);
         document.querySelector(".col").appendChild(endTurnBtn);
-    })
+    });
+
+
     socket.on("gameUpdated",(data)=>{
         if(gameId != data.gameId) return;
         if(playerIndex == data.currentPlayerTurn && !data.cardDrawn){
@@ -332,9 +334,11 @@ socket.on('connect',async ()=>{
                 showConfirmButton:false
             });
         }
-        ReactDOM.unmountComponentAtNode(document.querySelector(".players ul"))
-        ReactDOM.unmountComponentAtNode(document.querySelector(".board"))
-        ReactDOM.unmountComponentAtNode(document.querySelector("#queue"))
+        ReactDOM.unmountComponentAtNode(document.querySelector(".players ul"));
+        ReactDOM.unmountComponentAtNode(document.querySelector(".board"));
+        ReactDOM.unmountComponentAtNode(document.querySelector("#queue"));
+        let animated = "";
+        if(!data.cardDrawn) animated = "animate__animated animate__bounce"
         players = [];
         for(let player of data.players){
             players.push({
@@ -354,7 +358,10 @@ socket.on('connect',async ()=>{
           );
          
           ReactDOM.render(
-            React.createElement(Board, {currentCard: {value:data.currentCard.value,color:data.currentCard.color,isSpecial:data.currentCard.isSpecial}}, null),
+            React.createElement(Board, {
+                currentCard: {value:data.currentCard.value,color:data.currentCard.color,isSpecial:data.currentCard.isSpecial},
+                animated:animated
+            }, null),
             document.querySelector(".board")
           );
           contentBG.style.backgroundColor = colorMap[data.currenColor];
@@ -590,7 +597,7 @@ socket.on('connect',async ()=>{
                 position: 'top-start',
                 title: `${data.playerName}: ${data.message}`,
                 showConfirmButton: false,
-                timer: 15000000,
+                timer: 300,
                 backdrop:false,
                 customClass:{
                     title: 'swal-title',
@@ -598,6 +605,11 @@ socket.on('connect',async ()=>{
                 }
             })
         }
+    });
+
+    socket.on("changeIndex",(data)=>{
+        if(data.gameId != gameId || data.playerId != playerId)return;
+        playerIndex = data.newIndex;
     })
 });
 
