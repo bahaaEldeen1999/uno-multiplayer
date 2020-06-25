@@ -58,7 +58,7 @@ io.on("connection", (socket) => {
             });
             yield newGame.save();
             // send back id to host
-            io.sockets.emit("createdGameId", {
+            socket.emit("createdGameId", {
                 gameId: newGame._id,
                 playerId: data.playerId
             });

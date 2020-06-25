@@ -221,6 +221,7 @@ class Game {
             game.gameStart = true;
             game.numberOfPlayers = game.players.length;
             game.isReversed = false;
+            game.currentPlayerTurn = 0;
             yield game.save();
             return game;
         });
