@@ -199,5 +199,31 @@ class Game {
             return 1;
         });
     }
+    resetGame(game) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const numberOfPlayers = game.players.length;
+            if (numberOfPlayers < 2)
+                throw new Error("can't start a game with less than 2 players");
+            for (let i = 0; i < numberOfPlayers; i++) {
+                game.players[i].cards = [];
+                game.players[i].drawCard = 0;
+                game.players[i].canEnd = false;
+                game.players[i].score = 0;
+                // draw 7 cards for each player 
+                for (let j = 0; j < 7; j++) {
+                    let card = this.deck.drawCard();
+                    game.players[i].cards.push(card);
+                }
+            }
+            // intialize current card on board with random value
+            game.currentCard = this.deck.drawNonSpecialCard();
+            game.currentColor = game.currentCard.color;
+            game.gameStart = true;
+            game.numberOfPlayers = game.players.length;
+            game.isReversed = false;
+            yield game.save();
+            return game;
+        });
+    }
 }
 exports.default = Game;

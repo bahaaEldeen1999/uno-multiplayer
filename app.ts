@@ -9,6 +9,7 @@ import dotenv from 'dotenv';
 import {  gameModel  } from './model/db-model';
 import Player from './source/player';
 import { createCallChain } from 'typescript';
+import { fdatasync } from 'fs';
 
 dotenv.config();
 
@@ -52,7 +53,7 @@ io.on("connection", (socket) => {
       });
       await newGame.save();
       // send back id to host
-      io.sockets.emit("createdGameId", {
+      socket.emit("createdGameId", {
         gameId: newGame._id,
         playerId:data.playerId
       });
@@ -67,6 +68,7 @@ io.on("connection", (socket) => {
   // when other user want to join game
   socket.on("joinGame", async (data) => {
     try {
+      if (!data.gameId || !data.playerId) throw new Error("not enough data");
       let game = await gameModel.findById(data.gameId);
       if(!game) throw new Error("no game with this id");
       
@@ -74,6 +76,10 @@ io.on("connection", (socket) => {
         throw new Error("the game already runnning cannot join");
         
        
+      }
+      // check that didnt join before
+      for (let player of game.players) {
+        if (player.playerId == data.playerId) return;
       }
       let index = game.players.length;
       game.players.push({
@@ -412,9 +418,7 @@ io.on("connection", (socket) => {
           // delete game from db
           await gameModel.findByIdAndDelete(gameId);
           return;
-        } else if (game.numberOfPlayers == 1) {
-          io.sockets.emit("gameEnd", { gameId:gameId,playerIndex:game.players[0].number,playerId:game.players[0].playerId,success: "game ended" });
-        }
+        } 
         break;
       }
       }
@@ -480,7 +484,7 @@ io.on("connection", (socket) => {
       let name = data.playerName;
       if (!gameId || !name) throw new Error("not enough data");
       const game = await gameModel.findById(gameId);
-      if(!game) throw new Error("no game with this id");
+      if (!game) throw new Error("no game with this id");
       game.chat.push({
         playerName: name,
         message: data.message
@@ -498,9 +502,48 @@ io.on("connection", (socket) => {
       
     } catch (err) {
       console.log(err);
-        socket.emit("errorInRequest",{msg:err.message});
+      socket.emit("errorInRequest", { msg: err.message });
+    }
+  });
+
+  socket.on("rematch", async (data) => {
+    try {
+      if (!data.gameId) throw new Error("not enough data");
+      let game = await gameModel.findById(data.gameId);
+      // reset game 
+      game = await gameController.resetGame(game);
+    let players = [];
+    for (let player of game.players) {
+      players.push({
+        name: player.name,
+        index: player.index,
+        number: player.cards.length,
+        score:player.score
+      })
       }
-  })
+    for (let player of game.players) { 
+      io.to(player.socketId).emit("gameCreated", {
+        gameId: data.gameId,
+        players: players,
+        currentCard: game.currentCard,
+        currentPlayerTurn: game.currentPlayerTurn,
+        currenColor:game.currentColor
+      });
+    }
+    
+    for (let player of game.players) {
+      io.to(player.socketId).emit("getCards", {
+        playerId: player.playerId,
+        cards: player.cards,
+        gameId:data.gameId
+      });
+      }
+      
+      
+    }catch(err){
+      socket.emit("errorInRequest",{msg:err.message});
+    }
+  });
 
 })
 

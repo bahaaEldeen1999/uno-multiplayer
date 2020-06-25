@@ -87,7 +87,7 @@ socket.on('connect',async ()=>{
         });
         $("#gameIdText").text("creating the game....");
         socket.on("createdGameId",(data)=>{
-                if(data.playerId != playerId)return;
+                if(data.playerId != playerId || gameId != undefined)return;
                 gameId = data.gameId;
                 $("#gameIdText").text(data.gameId);
                 playerIndex = 0;
@@ -117,9 +117,12 @@ socket.on('connect',async ()=>{
             });
 
         });
-        document.querySelector("#startGameDiv").appendChild(startGameBtn);
+        let modalsOverlay  = document.querySelectorAll(".modal-overlay")
+        for(let modalOverlay of modalsOverlay){
+            modalOverlay.remove();
+        }
+        if(document.querySelector("#startGameDiv").innerHTML.trim() == "") document.querySelector("#startGameDiv").appendChild(startGameBtn);
         // add game id to floating point
-        //<a class="btn-floating btn-large waves-effect waves-light red"><i class="material-icons">add</i></a
         let showGameId = document.createElement('a');
         showGameId.className = "btn-floating btn-large waves-effect waves-light teal"
         showGameId.innerText = "gameId";
@@ -200,6 +203,10 @@ socket.on('connect',async ()=>{
         else{
             gameId = document.querySelector("#gameIdInput").value;
             modalJoin.close();
+            let modalsOverlay  = document.querySelectorAll(".modal-overlay")
+            for(let modalOverlay of modalsOverlay){
+                modalOverlay.remove();
+            }
             socket.emit("joinGame",{
                 gameId:gameId,
                 name:playerName,
@@ -281,7 +288,9 @@ socket.on('connect',async ()=>{
                 score:player.score
             });
         }
-        
+        ReactDOM.unmountComponentAtNode(document.querySelector(".players ul"));
+        ReactDOM.unmountComponentAtNode(document.querySelector(".board"));
+        document.querySelector(".col").innerHTML = "";
         ReactDOM.render(
             React.createElement(Players, {
                 players: players,
@@ -474,28 +483,44 @@ socket.on('connect',async ()=>{
     });
     socket.on("gameEnd",(data)=>{
         if(data.gameId != gameId)return;
-        if(data.playerId == playerId){
-            swal.fire({
-               confirmButtonColor:"#2c3e50",
-                icon: 'success',
-                title:"congtatulations!! You Won",
-                onClose: function(){
-                    window.location.href = '/';
-                },
-                confirmButtonText:"reload"
-
-            });
-        }else{
-            swal.fire({
-               confirmButtonColor:"#2c3e50",
-                icon: 'info',
-                title:"game ended",
-                onClose: function(){
-                    window.location.href = '/';
-                },
-                confirmButtonText:"reload"
-            });
-        }
+            if(data.playerId == playerId){
+                swal.fire({
+                   confirmButtonColor:"#2c3e50",
+                   cancelButtonColor:"#2c3e50",
+                    icon: 'success',
+                    title:"congtatulations!! You Won",
+                    showCancelButton:true,
+                    cancelButtonText:"reload",
+                    confirmButtonText:"rematch"               
+                }).then(e=>{
+                    if(e.isConfirmed){
+                        socket.emit("rematch",{
+                            gameId:gameId
+                        })
+                    }else{
+                        window.location.href = '/';
+                    } 
+                });
+            }else{
+                swal.fire({
+                   confirmButtonColor:"#2c3e50",
+                   cancelButtonColor:"#2c3e50",
+                    icon: 'info',
+                    title:"game ended",
+                    showCancelButton:true,
+                    cancelButtonText:"reload",
+                    confirmButtonText:"rematch"
+                }).then(e=>{
+                    if(e.isConfirmed){
+                        socket.emit("rematch",{
+                            gameId:gameId
+                        })
+                    }else{
+                        window.location.href = '/';
+                    } 
+                });
+            }
+        
         
     });
     socket.on("uno",(data)=>{
