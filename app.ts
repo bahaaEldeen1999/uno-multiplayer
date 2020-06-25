@@ -124,13 +124,14 @@ io.on("connection", (socket) => {
       let game = await gameModel.findById(data.gameId);
       if(!game) throw new Error("no game with this id");
       
-    game.gameStart = true;
+    
     game.numberOfPlayers = game.players.length;
     game.isReversed = false;
     await game.save();
     let players = [];
     for (let player of game.players) players.push(player);
-    game = await gameController.createGame(game._id, players);
+      game = await gameController.createGame(game._id, players);
+      game.gameStart = true;
     players = [];
     for (let player of game.players) {
       players.push({
