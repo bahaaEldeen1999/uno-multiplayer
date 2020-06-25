@@ -193,7 +193,8 @@ io.on("connection", (socket) => {
           players: players,
           currentCard: game.currentCard,
           currentPlayerTurn: game.currentPlayerTurn,
-          currenColor: game.currentColor
+          currenColor: game.currentColor,
+          cardDrawn: isPlayed == 4 || isPlayed == 3 ? true : false,
         });
       }
    
@@ -476,7 +477,8 @@ io.on("connection", (socket) => {
         io.to(player.socketId).emit("messageRecieve", {
           gameId: game._id,
           playerName: name,
-          message: data.message
+          message: data.message,
+          playerId: data.playerId
         });
       }
       

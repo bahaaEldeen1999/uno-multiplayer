@@ -100,10 +100,13 @@ socket.on('connect',async ()=>{
         showQueue = true;
         modalHost.close();  
         let playersCollection  = document.querySelector("#queue");
+        if(playersCollection.innerHTML.trim() == ""){
         let playerList= document.createElement('li');
         playerList.classList.add("collection-item")
         playerList.innerText = playerName+" (You)";
         playersCollection.appendChild(playerList);
+        
+        }
         let startGameBtn = document.createElement("button");
         startGameBtn.id = "startGameBtn";
         startGameBtn.innerText = "start game";
@@ -151,7 +154,8 @@ socket.on('connect',async ()=>{
               socket.emit("chatMessage",{
                   gameId:gameId,
                   playerName:playerName,
-                  message:text
+                  message:text,
+                  playerId:playerId
               });
               
             }
@@ -181,7 +185,6 @@ socket.on('connect',async ()=>{
     joinGameBtn.click(async ()=>{
         
         if(!document.querySelector("#gameIdInput").value){
-            console.log(modalJoin)
             modalJoin.close();
              setTimeout(()=>{
                 modalJoin.open();
@@ -241,7 +244,8 @@ socket.on('connect',async ()=>{
                     socket.emit("chatMessage",{
                         gameId:gameId,
                         playerName:playerName,
-                        message:text
+                        message:text,
+                        playerId:playerId
                     });
                     
                     }
@@ -580,7 +584,20 @@ socket.on('connect',async ()=>{
         let li = document.createElement("li");
         li.innerText = `${data.playerName}: ${data.message}`;
         navChat.appendChild(li);
-        navChat.scrollTop = navChat.scrollHeight
+        navChat.scrollTop = navChat.scrollHeight;
+        if(playerId != data.playerId){
+            Swal.fire({
+                position: 'top-start',
+                title: `${data.playerName}: ${data.message}`,
+                showConfirmButton: false,
+                timer: 15000000,
+                backdrop:false,
+                customClass:{
+                    title: 'swal-title',
+                    container: 'swal-container-class',
+                }
+            })
+        }
     })
 });
 
