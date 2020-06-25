@@ -126,7 +126,6 @@ io.on("connection", (socket) => {
             let game = yield db_model_1.gameModel.findById(data.gameId);
             if (!game)
                 throw new Error("no game with this id");
-            game.gameStart = true;
             game.numberOfPlayers = game.players.length;
             game.isReversed = false;
             yield game.save();
@@ -134,6 +133,7 @@ io.on("connection", (socket) => {
             for (let player of game.players)
                 players.push(player);
             game = yield gameController.createGame(game._id, players);
+            game.gameStart = true;
             players = [];
             for (let player of game.players) {
                 players.push({
