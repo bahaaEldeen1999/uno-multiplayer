@@ -491,7 +491,10 @@ socket.on('connect',async ()=>{
                     title:"congtatulations!! You Won",
                     showCancelButton:true,
                     cancelButtonText:"reload",
-                    confirmButtonText:"rematch"               
+                    confirmButtonText:"rematch" ,
+                    allowOutsideClick:false,
+                    allowEscapeKey:false,
+                    allowEnterKey:false,              
                 }).then(e=>{
                     if(e.isConfirmed){
                         socket.emit("rematch",{
@@ -509,7 +512,10 @@ socket.on('connect',async ()=>{
                     title:"game ended",
                     showCancelButton:true,
                     cancelButtonText:"reload",
-                    confirmButtonText:"rematch"
+                    confirmButtonText:"rematch",
+                    allowOutsideClick:false,
+                    allowEscapeKey:false,
+                    allowEnterKey:false,  
                 }).then(e=>{
                     if(e.isConfirmed){
                         socket.emit("rematch",{
@@ -622,7 +628,7 @@ socket.on('connect',async ()=>{
                 position: 'top-start',
                 title: `${data.playerName}: ${data.message}`,
                 showConfirmButton: false,
-                timer: 300,
+                timer: 1000,
                 backdrop:false,
                 customClass:{
                     title: 'swal-title',
