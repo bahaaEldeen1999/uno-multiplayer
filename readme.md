@@ -60,3 +60,6 @@
 
 #### can you help me :blush: ? 
 <p>offcourse you can help me by reporting bugs and issue so i can solve them as soon as possibe, or even suggest changes or rules that you would like to see </p>
+
+#### special thanks
+thanks to my friend <a href="https://www.linkedin.com/in/ziad-sameh-658654170/" target="_blank">ziad</a> for helping me in the early tesing stages of the game
