@@ -277,6 +277,7 @@ socket.on('connect',async ()=>{
     
     socket.on("gameCreated",(data)=>{
         if(gameId != data.gameId) return;
+        swal.close();
         document.querySelector("#queue").innerHTML = "";
         document.querySelector("#queue").className= "";
         if(document.querySelector("#startGameBtn"))document.querySelector("#startGameBtn").remove();
