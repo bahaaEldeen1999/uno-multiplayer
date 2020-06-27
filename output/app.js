@@ -518,12 +518,13 @@ socket.on('connect',async ()=>{
                     allowEscapeKey:false,
                     allowEnterKey:false,  
                 }).then(e=>{
-                    if(e.isConfirmed){
+                    if(e.isDismissed){
+                        window.location.href = '/';
+                    }else{
+                        
                         socket.emit("rematch",{
                             gameId:gameId
                         })
-                    }else{
-                        window.location.href = '/';
                     } 
                 });
             }
