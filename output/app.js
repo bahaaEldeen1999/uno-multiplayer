@@ -6,6 +6,7 @@ let playerIndex = undefined;
 let host = undefined;
 let playerId = "";
 let showQueue = false;
+let rematch = false;
 let mainThemeAudio = new Audio('audio/theme.mp3');
 mainThemeAudio.loop = true;
 mainThemeAudio.volume = .2;
@@ -497,6 +498,7 @@ socket.on('connect',async ()=>{
                     allowEscapeKey:false,
                     allowEnterKey:false,              
                 }).then(e=>{
+                    console.log(e);
                     if(e.isDismissed){
                         window.location.href = '/';
                     }else{
@@ -511,23 +513,9 @@ socket.on('connect',async ()=>{
                    confirmButtonColor:"#2c3e50",
                    cancelButtonColor:"#2c3e50",
                     icon: 'info',
-                    title:"game ended",
-                    showCancelButton:true,
-                    cancelButtonText:"reload",
-                    confirmButtonText:"rematch",
-                    allowOutsideClick:false,
-                    allowEscapeKey:false,
-                    allowEnterKey:false,  
-                }).then(e=>{
-                    if(e.isDismissed){
-                        window.location.href = '/';
-                    }else{
-                        
-                        socket.emit("rematch",{
-                            gameId:gameId
-                        })
-                    } 
-                });
+                    title:"game ended only the winner can rematch",
+                    
+                })
             }
         
         
