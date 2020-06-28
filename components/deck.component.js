@@ -6,19 +6,31 @@ class Deck extends React.Component{
         nav:true,
         responsive:{
             0:{
-                items:1,
+                items:2,
                 nav:true
             },
             100:{
-                items:2,
+                items:3,
                 nav:true,
+            },
+            200:{
+                items:3,
+                nav:true,  
+            },
+            300:{
+                items:4,
+                nav:true, 
             },
             400:{
-                items:4,
+                items: 5,
                 nav:true,
             },
-            600:{
+            500:{
                 items:6,
+                nav:true, 
+            },
+            600:{
+                items:7,
                 nav:true,
             },
             800:{
@@ -54,12 +66,7 @@ class Deck extends React.Component{
         var $owl = $('.owl-carousel');
         $owl.owlCarousel(this.carouselOption);
     }
-    // componentDidUpdate(){
-    //     var $owl = $('.owl-carousel');
-    //     $owl.trigger('destroy.owl.carousel');
-    //     $owl.html($owl.find('.owl-stage-outer').html()).removeClass('owl-loaded');
-    //     $owl.owlCarousel(this.carouselOption);
-    // }
+
     render(){
        
         return (

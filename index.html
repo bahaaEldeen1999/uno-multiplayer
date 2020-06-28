@@ -17,144 +17,6 @@
 
 
 
-<style>
-* {
-margin: 0;
-transition: ease-in-out all .2s;
-}
-html, body {
-min-height: 100vh;
-}
-body{
-display: flex;
-flex-direction: column;
-}
-.players{
-
-position: absolute;
-right: 0;
-z-index: 9;
-}
-.deck-wrapper{
-flex-shrink: 0;
-position: relative;
-}
-.content {
-flex: 1 0 auto;
-}
-.item{
-    text-align: center;
-}
-.item-slick img{
-    width:100px !important;
-    margin: auto;
-}
-.none{
-    display: none;
-}
-.board{
-    display: flex;
-align-items: center;
-justify-content: center;
-min-width: 100%;
-
-}
-.board  img{
-
-    width: 200px !important;
-    margin-top: 30px;
-}
-.item-slick{
-    margin-left: 10px;
-    margin-right: 10px;
-}
-.card-deck{
-    display: block;
-}
-
- #frame{
-    display: flex;
-  justify-content: center;
-  align-items: center;
- }
-.turn{
-    transform: scale(1.1);
-    color: #ecf0f1 !important;
-    background-color: #2c3e50 !important;
-}
-.turn .badge{
-    transform: scale(1.1);
-    color: #ecf0f1 !important;
-    background-color: #2c3e50 !important;
-}
-.turn::after{
-    content: " (current turn)";
-}
-.current{
-    font-weight: bold;
-}
-.current::after{
-    content: " (You)";
-}
-select{
-display: block;
-}
-.col .waves-effect.waves-light.btn{
-    background-color: #2c3e50 ;
-}
-.col .waves-effect.waves-light.btn:hover{
-    background-color: #34495e ;
-}
-.btn-floating{
-    position: fixed;
-    bottom: 0;
-    right:  0;
-    margin: 10px;
-    padding: 5px;
-    
-}
-.sidenav-trigger{
-    position: fixed;
-    bottom: 0;
-    left:  0;
-    margin: 10px;
-    padding: 5px;
-    cursor: pointer;
-    border-radius:  10px;
-    z-index: 5;
-}
-.btn,.btn-flat,.btn-floating ,.btn-large{
-    background-color: #2c3e50 !important;
-    color: #ecf0f1 !important;
-}
-textarea{
-    position: fixed !important;
-    bottom: 0px !important;
-    margin-bottom: 60px !important;
-    background-color: white !important;
-}
-#chatBox{
-    overflow: auto;
-    height: 100%;
-}
-#chatBox li:last-of-type{
-    padding-bottom: 45px;
-}
-ul.sidenav{
-    overflow-y: hidden;
-}
-.swal-title{
-    font-size: 12px !important;
-}
-.swal2-popup.swal2-modal.swal2-show{
-    padding: 10px !important;
-    text-align: left;
-
-}
-.swal2-popup{
-    width: auto !important;
-}
-</style>
 </head>
 <body>
   
@@ -230,11 +92,15 @@ ul.sidenav{
 
     </div>
 <div class="content">
+    
+        
         <div class="players">
-            <ul class="">
+            <a class="btn-floating btn-large waves-effect waves-light  open-players">show</a>
+            <ul>
     
             </ul>
         </div>
+    
         <div class="board">
 
         </div>

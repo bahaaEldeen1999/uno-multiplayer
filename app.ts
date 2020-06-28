@@ -405,14 +405,7 @@ io.on("connection", (socket) => {
     // remove this player from the game
     for (let i = 0; i < game.players.length; i++){
       if (game.players[i].socketId == socketId) {
-        player = game.players[i];
-        
-        if (game.players[i].index == game.currentPlayerTurn) {
-          if (game.gameStart) {
-            await gameController.calculateNextTurn(game);
-            
-          } 
-        } 
+        player = game.players[i]; 
         game.players.splice(i, 1);
         game.numberOfPlayers = game.players.length;
         if (game.numberOfPlayers == 0) {
@@ -434,12 +427,13 @@ io.on("connection", (socket) => {
             playerId: game.players[i].playerId,
             newIndex:i
           });
+          io.to(game.players[i].socketId).emit("playerDiconnnected", {
+            gameId: gameId,
+            playerName: player.name
+          });
         }
         await game.save();
-        io.sockets.emit("playerDiconnnected", {
-          gameId: gameId,
-          playerName: player.name
-        });
+        
         let players = [];
             for (let player of game.players) {
               players.push({
