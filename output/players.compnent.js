@@ -58,9 +58,9 @@ var Players = function (_React$Component) {
                             { className: "badge" },
                             player.score
                         ),
-                        _this2.index == 0 ? React.createElement(
-                            "span",
-                            { className: "badge kick-btn", index: index },
+                        _this2.index == 0 && index != 0 ? React.createElement(
+                            "a",
+                            { className: " kick-btn", index: index },
                             "kick"
                         ) : null,
                         player.name

@@ -312,11 +312,11 @@ addEventListener('DOMContentLoaded',()=>{
                 })
             }
             window.addEventListener('resize',()=>{
-                width=innerWidth
+                width=innerWidth;
+                let openPlayersBtn = document.querySelector('.open-players');
                 if(width <= 600){
-                    openPlayersBtn.style.display = "block";
                     document.querySelector('.players ul').style.display = "none";
-                    let openPlayersBtn = document.querySelector('.open-players');
+                    openPlayersBtn.style.display = "block";
                     openPlayersBtn.addEventListener('click',()=>{
                         let players = document.querySelector('.players ul');
                         players.style.display = 'block';
@@ -338,7 +338,17 @@ addEventListener('DOMContentLoaded',()=>{
                 }, null),
                 document.querySelector(".players ul")
             );
-             
+            let kicks = document.querySelectorAll('.kick-btn');
+            for(let kick of kicks){
+               kick.addEventListener("click",(e)=>{
+                   console.log("F");
+                   socket.emit("kickPlayer",{
+                       playerId:playerId,
+                       gameId:gameId,
+                       index:Number(kick.attributes.index.value)
+                   })
+               });
+            }
             ReactDOM.render(
                 React.createElement(Board, {currentCard: {value:data.currentCard.value,color:data.currentCard.color,isSpecial:data.currentCard.isSpecial}}, null),
                 document.querySelector(".board")
@@ -404,7 +414,17 @@ addEventListener('DOMContentLoaded',()=>{
                 }, null),
                 document.querySelector(".players ul")
               );
-             
+             let kicks = document.querySelectorAll('.kick-btn');
+             for(let kick of kicks){
+                kick.addEventListener("click",(e)=>{
+                    console.log("F");
+                    socket.emit("kickPlayer",{
+                        playerId:playerId,
+                        gameId:gameId,
+                        index:Number(kick.attributes.index.value)
+                    })
+                });
+             }
               ReactDOM.render(
                 React.createElement(Board, {
                     currentCard: {value:data.currentCard.value,color:data.currentCard.color,isSpecial:data.currentCard.isSpecial},
@@ -453,12 +473,29 @@ addEventListener('DOMContentLoaded',()=>{
             players = data.players;
             let playersCollection  = document.querySelector("#queue");
             playersCollection.innerHTML = "";
+            let i =0;
             for(let player of players){
                 let playerList= document.createElement('li');
                 playerList.classList.add("collection-item")
                 playerList.innerText = player.name;
                 if(player.index == playerIndex)playerList.innerText += " (You)";
+                if(host && i != 0){
+                    let a = document.createElement("a");
+                    a.setAttribute("index",i);
+                    a.className ="kick-btn";
+                    a.innerText = "kick";
+                    playerList.appendChild(a);
+                    a.addEventListener("click",(e)=>{
+                        console.log(e.target.attributes.index.value);
+                        socket.emit("kickPlayer",{
+                            playerId:playerId,
+                            gameId:gameId,
+                            index:Number(e.target.attributes.index.value)
+                        })
+                    });
+                }
                 playersCollection.appendChild(playerList);
+                i++;
             }
         });
     
@@ -669,15 +706,24 @@ addEventListener('DOMContentLoaded',()=>{
         socket.on("changeIndex",(data)=>{
             if(data.gameId != gameId || data.playerId != playerId)return;
             playerIndex = data.newIndex;
-        })
+        });
+
+        socket.on("kickedPlayer",(data)=>{
+            if(data.gameId != gameId)return;
+                    swal.fire({
+                       confirmButtonColor:"#2c3e50",
+                       
+                        icon: 'warning',
+                        title:"You are kicked by the host",
+                        confirmButtonText:"ok" ,
+                        allowOutsideClick:false,
+                        allowEscapeKey:false,
+                        allowEnterKey:false,              
+                    }).then(e=>{
+                            window.location.href = '/';
+                   
+                    });
+
+                });
     });
-})
-
-
-
-            
-            
-
-       
-            
-
+});

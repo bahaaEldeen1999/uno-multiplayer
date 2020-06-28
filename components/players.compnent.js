@@ -30,7 +30,7 @@ class Players extends React.Component{
                         return (
                         <li className={classNames} ><span className="badge" >{player.number}</span> <span className="badge" >{player.score}</span>
                         {
-                            this.index == 0 ?<span className="badge kick-btn" index={index}  >kick</span>:null
+                            this.index == 0 && index != 0 ?<a className=" kick-btn" index={index}  >kick</a>:null
                             
                         }
                         

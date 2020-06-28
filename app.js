@@ -103,6 +103,7 @@ io.on("connection", (socket) => {
                     index: player.index
                 });
             }
+            game.markModified("players");
             yield game.save();
             socket.emit("joinedGame", {
                 gameId: game._id,
@@ -126,14 +127,10 @@ io.on("connection", (socket) => {
             let game = yield db_model_1.gameModel.findById(data.gameId);
             if (!game)
                 throw new Error("no game with this id");
-            game.numberOfPlayers = game.players.length;
-            game.isReversed = false;
-            yield game.save();
             let players = [];
             for (let player of game.players)
                 players.push(player);
             game = yield gameController.createGame(game._id, players);
-            game.gameStart = true;
             players = [];
             for (let player of game.players) {
                 players.push({
@@ -392,15 +389,12 @@ io.on("connection", (socket) => {
             if (!game)
                 return;
             let player;
+            let disconnected = 0;
             // remove this player from the game
             for (let i = 0; i < game.players.length; i++) {
                 if (game.players[i].socketId == socketId) {
+                    disconnected = 1;
                     player = game.players[i];
-                    if (game.players[i].index == game.currentPlayerTurn) {
-                        if (game.gameStart) {
-                            yield gameController.calculateNextTurn(game);
-                        }
-                    }
                     game.players.splice(i, 1);
                     game.numberOfPlayers = game.players.length;
                     if (game.numberOfPlayers == 0) {
@@ -411,6 +405,8 @@ io.on("connection", (socket) => {
                     break;
                 }
             }
+            if (!disconnected)
+                return;
             if (game.numberOfPlayers > 0) {
                 // update current players index
                 for (let i = 0; i < game.players.length; i++) {
@@ -420,12 +416,12 @@ io.on("connection", (socket) => {
                         playerId: game.players[i].playerId,
                         newIndex: i
                     });
+                    io.to(game.players[i].socketId).emit("playerDiconnnected", {
+                        gameId: gameId,
+                        playerName: player.name
+                    });
                 }
                 yield game.save();
-                io.sockets.emit("playerDiconnnected", {
-                    gameId: gameId,
-                    playerName: player.name
-                });
                 let players = [];
                 for (let player of game.players) {
                     players.push({
@@ -521,6 +517,65 @@ io.on("connection", (socket) => {
                     cards: player.cards,
                     gameId: data.gameId
                 });
+            }
+        }
+        catch (err) {
+            socket.emit("errorInRequest", { msg: err.message });
+        }
+    }));
+    socket.on("kickPlayer", (data) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const gameId = data.gameId;
+            const game = yield db_model_1.gameModel.findById(gameId);
+            if (!game)
+                throw new Error("no game with this id");
+            if (game.players[0].playerId != data.playerId)
+                throw new Error("not the current host");
+            if (!data.index)
+                throw new Error("not enough data");
+            if (data.index <= 0 || data.index >= game.players.length)
+                throw new Error("cannot remove player with this index");
+            io.to(game.players[data.index].socketId).emit("kickedPlayer", { gameId: gameId });
+            game.players.splice(data.index, 1);
+            game.numberOfPlayers = game.numberOfPlayers - 1;
+            game.markModified("players");
+            yield game.save();
+            // update current players index
+            for (let i = 0; i < game.players.length; i++) {
+                game.players[i].index = i;
+                io.to(game.players[i].socketId).emit("changeIndex", {
+                    gameId: gameId,
+                    playerId: game.players[i].playerId,
+                    newIndex: i
+                });
+            }
+            let players = [];
+            for (let player of game.players) {
+                players.push({
+                    name: player.name,
+                    index: player.index,
+                    number: player.cards.length,
+                    score: player.score
+                });
+            }
+            if (game.gameStart) {
+                for (let player of game.players) {
+                    io.to(player.socketId).emit("gameUpdated", {
+                        gameId: gameId,
+                        players: players,
+                        currentCard: game.currentCard,
+                        currentPlayerTurn: game.currentPlayerTurn,
+                        currenColor: game.currentColor
+                    });
+                }
+            }
+            else {
+                for (let player of game.players) {
+                    io.to(player.socketId).emit("queueChanged", {
+                        gameId: game._id,
+                        players: players
+                    });
+                }
             }
         }
         catch (err) {

@@ -150,6 +150,14 @@
     .players ul{
         display: block;
     }
+    .kick-btn{
+        float: right;
+        background: #2c3e50;
+        padding: 3px 10px;
+        color: white;
+        margin-left: 5px;
+        cursor: pointer;
+    }
     /* responsive */
 
     @media screen and (max-width: 600px){

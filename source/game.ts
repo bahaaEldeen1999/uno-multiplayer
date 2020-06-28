@@ -20,6 +20,9 @@ class Game {
     // intialize current card on board with random value
     game.currentCard = this.deck.drawNonSpecialCard();
     game.currentColor = game.currentCard.color;
+    game.numberOfPlayers = numberOfPlayers;
+    game.isReversed = false;
+    game.gameStart = true;
     await game.save();
     return game;
   }
