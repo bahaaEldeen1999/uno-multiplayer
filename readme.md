@@ -9,8 +9,9 @@
  <li>in game chat</li>
  <li>all the cards are supported with their special effects on the game</li>
  <li>score system</li>
- <li>rematch with the same players after the game ends</li>
+ <li>the winner can have rematch with the same players after the game ends</li>
  <li>standard uno rules so no stacking or other non-standard rules are allowed</li>
+ <li>the host can kick players</li>
  </ul>
 
 ### :eyeglasses: for tech nerds like me 
