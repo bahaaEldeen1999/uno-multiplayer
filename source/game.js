@@ -180,7 +180,6 @@ class Game {
                 return 0;
             if (["red", "yellow", "blue", "green"].includes(color)) {
                 game.currentColor = color;
-                game.currentCard.isSpecial = false;
                 this.calculateNextTurn(game);
                 yield game.save();
                 return game;

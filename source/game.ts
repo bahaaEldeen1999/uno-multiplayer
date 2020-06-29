@@ -155,7 +155,6 @@ class Game {
     if (game.players[game.currentPlayerTurn].playerId != playerId) return 0;
     if (["red", "yellow", "blue", "green"].includes(color)) {
       game.currentColor = color;
-      game.currentCard.isSpecial = false;
       this.calculateNextTurn(game);
       await game.save();
       return game;
