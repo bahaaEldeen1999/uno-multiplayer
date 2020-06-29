@@ -58,7 +58,7 @@ class Rules {
                     return 5;
             }
             else {
-                if (this.card2.color == this.currentColor || this.card1.value == this.card2.value) {
+                if (this.card2.color == this.currentColor || (this.card1.value == this.card2.value && this.card1.color != "black")) {
                     if (this.card2.value == 1)
                         return 3;
                     else if (this.card2.value == 2)
