@@ -1,4 +1,5 @@
-import Card from './card';
+
+const Card = require("./card")
 class Deck {
   /**
    * 8 wild cards, 1 => +4, 2 => mystery
@@ -6,11 +7,11 @@ class Deck {
    * 1 => skip, 2 => +2, 3 => reverse 
    * 
    */
-  drawCard(): Card {
-    let random:number = Math.random();
-    let value: number = undefined;
-    let isSpecial: boolean = false;
-    let color: string = undefined;
+  drawCard() {
+    let random = Math.random();
+    let value = undefined;
+    let isSpecial = false;
+    let color = undefined;
     if (random < 0.01) {
       random = Math.random();
       isSpecial = true;
@@ -67,11 +68,11 @@ class Deck {
     return new Card(value,color,isSpecial);
   }
 
-  drawNonSpecialCard(): Card{
-    let random:number = Math.random();
-    let value: number = undefined;
-    let isSpecial: boolean = false;
-    let color: string = undefined;
+  drawNonSpecialCard(){
+    let random = Math.random();
+    let value = undefined;
+    let isSpecial = false;
+    let color = undefined;
     random = Math.random();
     if (random < 0.25) {
       color = "red";
@@ -98,4 +99,4 @@ class Deck {
     return new Card(value,color,isSpecial);
   }
 }
-export default Deck;
+module.exports = Deck;

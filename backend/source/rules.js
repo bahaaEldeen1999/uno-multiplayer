@@ -1,4 +1,3 @@
-import Card from './card';
 
 /**
  * 0 => invaild move
@@ -10,10 +9,10 @@ import Card from './card';
  * 6 => +4
  */
 class Rules {
-  card1: Card;
-  card2: Card;
-  currentColor: string;
-  constructor(card1: Card, card2: Card,currentColor:string) {
+  card1;
+  card2;
+  currentColor;
+  constructor(card1, card2,currentColor) {
     this.card1 = card1;
     this.card2 = card2;
     this.currentColor = currentColor;
@@ -57,4 +56,4 @@ class Rules {
   }
 }
 
-export default Rules;
+module.exports = Rules;

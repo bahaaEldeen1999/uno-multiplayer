@@ -1,19 +1,21 @@
-import Card from './card';
-import Deck from './deck';
-import Player from './player';
-import Rules from './rules';
-import mongoose from 'mongoose';
-import {  gameModel } from '../model/db-model';
+const Card  = require( './card');
+const Deck= require ('./deck');
+const Player =require ('./player');
+const Rules= require( './rules');
+const mongoose =require( 'mongoose');
+const {  gameModel } =require( '../model/db-model');
+
+ 
 class Game {
-   deck: Deck = new Deck();
-  async createGame(gameId: mongoose.Types.ObjectId, players: Array<Player>) {
+   deck = new Deck();
+  async createGame(gameId, players) {
     const numberOfPlayers = players.length;
     if (numberOfPlayers < 2) throw new Error("can't start a game with less than 2 players");
     const game = await gameModel.findById(gameId);
     for (let i = 0; i < numberOfPlayers; i++){
       // draw 7 cards for each player 
       for (let j = 0; j < 7; j++){
-        let card: Card = this.deck.drawCard();
+        let card = this.deck.drawCard();
         game.players[i].cards.push(card);
       }
     }
@@ -39,10 +41,10 @@ class Game {
 
     
   }
-  addCard(game,card: Card): void {
+  addCard(game,card) {
     game.players[game.currentPlayerTurn].cards.push(card);
   }
-  removeCard(game,index: number): void{
+  removeCard(game,index) {
     game.players[game.currentPlayerTurn].cards.splice(index, 1);
   }
   /**
@@ -56,14 +58,14 @@ class Game {
    * 6 => inverse
    * 7 => game end
    */
-  async play(gameId: mongoose.Types.ObjectId, playerIndex: Number, cardIndex: number, card: Card,playerId:string) {
+  async play(gameId, playerIndex, cardIndex, card,playerId) {
    // console.log(playerIndex, cardIndex, card);
     card.isSpecial = card.isspecial;
     const game = await gameModel.findById(gameId);
     if (game.currentPlayerTurn != playerIndex || game.players[game.currentPlayerTurn].playerId != playerId) return -1;
     game.players[game.currentPlayerTurn].drawCard = 0;
-    let rule: Rules = new Rules(game.currentCard, card,game.currentColor);
-    let ruleNumber: number = rule.getRule();
+    let rule = new Rules(game.currentCard, card,game.currentColor);
+    let ruleNumber = rule.getRule();
     if (!ruleNumber) return 0;
     game.players[game.currentPlayerTurn].canEnd = true;
     game.currentColor = card.color;
@@ -149,7 +151,7 @@ class Game {
     
  
   }
-  async changCurrentColor(gameId: mongoose.Types.ObjectId, color: string,playerIndex:number,playerId:string) {
+  async changCurrentColor(gameId, color,playerIndex,playerId) {
     const game = await gameModel.findById(gameId);
     if (game.currentPlayerTurn != playerIndex) return 0;
     if (game.players[game.currentPlayerTurn].playerId != playerId) return 0;
@@ -162,7 +164,7 @@ class Game {
     return 0;
   }
 
-  async drawCard(gameId: mongoose.Types.ObjectId, playerIndex: number,playerId: string) {
+  async drawCard(gameId, playerIndex,playerId) {
     const game = await gameModel.findById(gameId);
     if (!game) return 0;
     if (game.currentPlayerTurn != playerIndex || game.players[playerIndex].drawCard >= 2 || game.players[playerIndex].playerId != playerId) return 0;
@@ -184,7 +186,7 @@ class Game {
 
       // draw 7 cards for each player 
       for (let j = 0; j < 7; j++){
-        let card: Card = this.deck.drawCard();
+        let card = this.deck.drawCard();
         game.players[i].cards.push(card);
       }
     }
@@ -199,5 +201,4 @@ class Game {
     return game;
   }
 }
-
-export default Game;
+module.exports = Game;

@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": " tsc && node app.js"
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
@@ -17,21 +17,11 @@
     "url": "https://github.com/bahaaEldeen1999/uno-multiplayer/issues"
   },
   "homepage": "https://github.com/bahaaEldeen1999/uno-multiplayer#readme",
-  "devDependencies": {
-    "@types/express": "^4.17.6",
-    "@types/node": "^14.0.13",
-    "ts-loader": "^7.0.5",
-    "typescript": "^3.9.5"
-  },
   "dependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-preset-react-app": "^3.1.2",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "mongoose": "^5.9.18",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
     "socket.io": "^2.3.0"
   }
 }
