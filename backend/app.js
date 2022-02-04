@@ -4,13 +4,16 @@ const express = require("express");
 const cors = require("cors");
 const socketio = require("socket.io");
 const http = require("http");
-require("./database/connection")();
-
+const path = require("path");
 const app = express();
 const PORT = 3000;
 const server = http.createServer(app);
 app.use(cors());
-
+app.use(express.static("../output"));
+app.use(express.static("../styles"));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../index.html"));
+});
 const io = socketio.listen(server);
 
 io.on("connection", async (socket) => {

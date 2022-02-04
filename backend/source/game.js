@@ -1,52 +1,71 @@
-const Card  = require( './card');
-const Deck= require ('./deck');
-const Player =require ('./player');
-const Rules= require( './rules');
-const mongoose =require( 'mongoose');
-const {  gameModel } =require( '../model/db-model');
+const Deck = require("./deck");
+const Rules = require("./rules");
+const helpers = require("../utils/helpers");
 
- 
 class Game {
-   deck = new Deck();
-  async createGame(gameId, players) {
-    const numberOfPlayers = players.length;
-    if (numberOfPlayers < 2) throw new Error("can't start a game with less than 2 players");
-    const game = await gameModel.findById(gameId);
-    for (let i = 0; i < numberOfPlayers; i++){
-      // draw 7 cards for each player 
-      for (let j = 0; j < 7; j++){
+  deck = new Deck();
+  players = [];
+  currentPlayerTurn = -1;
+  currentCard = null;
+  currentColor = null;
+  isReversed = false;
+  gameStart = false;
+  numberOfPlayers = 0;
+  chat = [];
+  id = null;
+
+  constructor() {
+    this.id = helpers.generateId();
+  }
+
+  addPlayer(player) {
+    player.index = this.players.length;
+    this.players.push(player);
+    return player.index;
+  }
+
+  createGame() {
+    this.numberOfPlayers = this.players.length;
+    if (this.numberOfPlayers < 2)
+      throw new Error("can't start a game with less than 2 players");
+    for (let i = 0; i < this.numberOfPlayers; i++) {
+      // draw 7 cards for each player
+      for (let j = 0; j < 7; j++) {
         let card = this.deck.drawCard();
-        game.players[i].cards.push(card);
+        this.players[i].cards.push(card);
       }
     }
     // intialize current card on board with random value
-    game.currentCard = this.deck.drawNonSpecialCard();
-    game.currentColor = game.currentCard.color;
-    game.numberOfPlayers = numberOfPlayers;
-    game.isReversed = false;
-    game.gameStart = true;
-    await game.save();
-    return game;
+    this.currentCard = this.deck.drawNonSpecialCard();
+    this.currentColor = this.currentCard.color;
+    this.isReversed = false;
+    this.gameStart = true;
+    this.currentPlayerTurn = 0;
   }
-  calculateNextTurn(game) {
-    game.players[game.currentPlayerTurn].drawCard = 0;
-    game.players[game.currentPlayerTurn].canEnd = false;
-    
-    if (game.isReversed && game.currentPlayerTurn == 0) game.currentPlayerTurn = game.numberOfPlayers - 1;
-      else {
-        if (game.isReversed) game.currentPlayerTurn--;
-        else game.currentPlayerTurn = (game.currentPlayerTurn + 1) % game.numberOfPlayers;
-    }
-    game.players[game.currentPlayerTurn].canEnd = false;
 
-    
+  calculateNextTurn() {
+    this.players[this.currentPlayerTurn].drawCard = 0;
+    this.players[this.currentPlayerTurn].canEnd = false;
+
+    if (this.isReversed && this.currentPlayerTurn == 0)
+      this.currentPlayerTurn = this.numberOfPlayers - 1;
+    else {
+      if (this.isReversed) this.currentPlayerTurn--;
+      else
+        this.currentPlayerTurn =
+          (this.currentPlayerTurn + 1) % this.numberOfPlayers;
+    }
+    this.players[this.currentPlayerTurn].canEnd = false;
   }
-  addCard(game,card) {
-    game.players[game.currentPlayerTurn].cards.push(card);
+
+  addCard(card) {
+    this.players[this.currentPlayerTurn].cards.push(card);
   }
-  removeCard(game,index) {
-    game.players[game.currentPlayerTurn].cards.splice(index, 1);
+
+  removeCard(index) {
+    this.players[this.currentPlayerTurn].cards.splice(index, 1);
   }
+
   /**
    * -1 => not your turn
    * 0 => false
@@ -58,147 +77,140 @@ class Game {
    * 6 => inverse
    * 7 => game end
    */
-  async play(gameId, playerIndex, cardIndex, card,playerId) {
-   // console.log(playerIndex, cardIndex, card);
-    card.isSpecial = card.isspecial;
-    const game = await gameModel.findById(gameId);
-    if (game.currentPlayerTurn != playerIndex || game.players[game.currentPlayerTurn].playerId != playerId) return -1;
-    game.players[game.currentPlayerTurn].drawCard = 0;
-    let rule = new Rules(game.currentCard, card,game.currentColor);
+  play(playerIndex, cardIndex, card, playerId) {
+    // console.log(playerIndex, cardIndex, card);
+    if (
+      this.currentPlayerTurn != playerIndex ||
+      this.players[this.currentPlayerTurn].playerId != playerId
+    )
+      return -1;
+    this.players[this.currentPlayerTurn].drawCard = 0;
+    let rule = new Rules(this.currentCard, card, this.currentColor);
     let ruleNumber = rule.getRule();
     if (!ruleNumber) return 0;
-    game.players[game.currentPlayerTurn].canEnd = true;
-    game.currentColor = card.color;
-    game.currentCard = card;
-    this.removeCard(game,cardIndex);
-    if (game.players[game.currentPlayerTurn].cards.length == 0) {
-      await game.save();
+    this.players[this.currentPlayerTurn].canEnd = true;
+    this.currentColor = card.color;
+    this.currentCard = card;
+    this.removeCard(cardIndex);
+    if (this.players[this.currentPlayerTurn].cards.length == 0) {
       return 7;
     }
     if (ruleNumber == 1) {
-      game.players[game.currentPlayerTurn].score += 20;
-      if (game.players[game.currentPlayerTurn].score >= 500) {
-        await game.save();
+      this.players[this.currentPlayerTurn].score += 20;
+      if (this.players[this.currentPlayerTurn].score >= 500) {
         return 7;
       }
-      this.calculateNextTurn(game);
-      await game.save();
+      this.calculateNextTurn();
       return 1;
     } else if (ruleNumber == 2) {
-      game.players[game.currentPlayerTurn].score += 20;
-      if (game.players[game.currentPlayerTurn].score >= 500) {
-        await game.save();
+      this.players[this.currentPlayerTurn].score += 20;
+      if (this.players[this.currentPlayerTurn].score >= 500) {
         return 7;
       }
-      this.calculateNextTurn(game);
+      this.calculateNextTurn();
       // draw 2 cards for the next player
-      this.addCard(game,this.deck.drawCard());
-      this.addCard(game, this.deck.drawCard());
-      await game.save();
+      this.addCard(this.deck.drawCard());
+      this.addCard(this.deck.drawCard());
       return 2;
     } else if (ruleNumber == 3) {
-      game.players[game.currentPlayerTurn].score += 20;
-      if (game.players[game.currentPlayerTurn].score >= 500) {
-        await game.save();
+      this.players[this.currentPlayerTurn].score += 20;
+      if (this.players[this.currentPlayerTurn].score >= 500) {
         return 7;
       }
       // skip player
-      this.calculateNextTurn(game);
-      this.calculateNextTurn(game);
+      this.calculateNextTurn();
+      this.calculateNextTurn();
 
-      await game.save();
       return 5;
     } else if (ruleNumber == 4) {
-      game.players[game.currentPlayerTurn].score += 20;
-      if (game.players[game.currentPlayerTurn].score >= 500) {
-        await game.save();
+      this.players[this.currentPlayerTurn].score += 20;
+      if (this.players[this.currentPlayerTurn].score >= 500) {
         return 7;
       }
-      // reverse 
-      // reverse work as skip in case of 2 players 
-      if (game.numberOfPlayers > 2) {
-        game.isReversed = !game.isReversed;
-        this.calculateNextTurn(game);
-      } 
-      await game.save();
+      // reverse
+      // reverse work as skip in case of 2 players
+      if (this.numberOfPlayers > 2) {
+        this.isReversed = !this.isReversed;
+        this.calculateNextTurn();
+      }
       return 6;
     } else if (ruleNumber == 5) {
-      game.players[game.currentPlayerTurn].score += 50;
-      if (game.players[game.currentPlayerTurn].score >= 500) {
-        await game.save();
+      this.players[this.currentPlayerTurn].score += 50;
+      if (this.players[this.currentPlayerTurn].score >= 500) {
         return 7;
       }
-      await game.save();
       return 3;
     } else if (ruleNumber == 6) {
-      game.players[game.currentPlayerTurn].score += 50;
-      if (game.players[game.currentPlayerTurn].score >= 500) {
-        await game.save();
+      this.players[this.currentPlayerTurn].score += 50;
+      if (this.players[this.currentPlayerTurn].score >= 500) {
         return 7;
       }
-      this.calculateNextTurn(game);
+      this.calculateNextTurn();
       // +4 current user
-      this.addCard(game,this.deck.drawCard());
-      this.addCard(game,this.deck.drawCard());
-      this.addCard(game,this.deck.drawCard());
-      this.addCard(game, this.deck.drawCard());
-      game.isReversed = !game.isReversed;
-      this.calculateNextTurn(game);
-      game.isReversed = !game.isReversed;
-      await game.save();
+      this.addCard(this.deck.drawCard());
+      this.addCard(this.deck.drawCard());
+      this.addCard(this.deck.drawCard());
+      this.addCard(this.deck.drawCard());
+      this.isReversed = !this.isReversed;
+      this.calculateNextTurn();
+      this.isReversed = !this.isReversed;
       return 4;
     }
-    
- 
   }
-  async changCurrentColor(gameId, color,playerIndex,playerId) {
-    const game = await gameModel.findById(gameId);
-    if (game.currentPlayerTurn != playerIndex) return 0;
-    if (game.players[game.currentPlayerTurn].playerId != playerId) return 0;
+  changCurrentColor(color, playerIndex, playerId) {
+    if (this.currentPlayerTurn != playerIndex) return -1;
+    if (this.players[this.currentPlayerTurn].playerId != playerId) return -1;
     if (["red", "yellow", "blue", "green"].includes(color)) {
-      game.currentColor = color;
-      this.calculateNextTurn(game);
-      await game.save();
-      return game;
+      this.currentColor = color;
+      this.calculateNextTurn();
+      return 0;
     }
+    return -1;
+  }
+
+  drawCard(playerIndex, playerId) {
+    // console.log(
+    //   this.players,
+    //   playerId,
+    //   playerIndex,
+    //   this.currentPlayerTurn,
+    //   this.isReversed
+    // );
+    if (
+      this.currentPlayerTurn != playerIndex ||
+      this.players[playerIndex].drawCard >= 2 ||
+      this.players[playerIndex].playerId != playerId
+    )
+      return -1;
+    this.players[playerIndex].cards.push(this.deck.drawCard());
+    this.players[playerIndex].drawCard++;
+    if (this.players[playerIndex].drawCard == 2)
+      this.players[playerIndex].canEnd = true;
     return 0;
   }
 
-  async drawCard(gameId, playerIndex,playerId) {
-    const game = await gameModel.findById(gameId);
-    if (!game) return 0;
-    if (game.currentPlayerTurn != playerIndex || game.players[playerIndex].drawCard >= 2 || game.players[playerIndex].playerId != playerId) return 0;
-    game.players[playerIndex].cards.push(this.deck.drawCard());
-    game.players[playerIndex].drawCard++;
-    if(game.players[playerIndex].drawCard == 2) game.players[playerIndex].canEnd = true;
-    await game.save();
-    return 1;
-    
-  }
-  async resetGame(game) {
-    const numberOfPlayers = game.players.length;
-    if (numberOfPlayers < 2) throw new Error("can't start a game with less than 2 players");
-    for (let i = 0; i < numberOfPlayers; i++){
-      game.players[i].cards = [];
-      game.players[i].drawCard = 0;
-      game.players[i].canEnd = false;
-      game.players[i].score = 0;
+  resetGame() {
+    const numberOfPlayers = this.players.length;
+    if (this.numberOfPlayers < 2)
+      throw new Error("can't start a game with less than 2 players");
+    for (let i = 0; i < this.numberOfPlayers; i++) {
+      this.players[i].cards = [];
+      this.players[i].drawCard = 0;
+      this.players[i].canEnd = false;
+      this.players[i].score = 0;
 
-      // draw 7 cards for each player 
-      for (let j = 0; j < 7; j++){
+      // draw 7 cards for each player
+      for (let j = 0; j < 7; j++) {
         let card = this.deck.drawCard();
-        game.players[i].cards.push(card);
+        this.players[i].cards.push(card);
       }
     }
     // intialize current card on board with random value
-    game.currentCard = this.deck.drawNonSpecialCard();
-    game.currentColor = game.currentCard.color;
-    game.gameStart = true;
-    game.numberOfPlayers = game.players.length;
-    game.isReversed = false;
-    game.currentPlayerTurn = 0;
-    await game.save();
-    return game;
+    this.currentCard = this.deck.drawNonSpecialCard();
+    this.currentColor = this.currentCard.color;
+    this.gameStart = true;
+    this.isReversed = false;
+    this.currentPlayerTurn = 0;
   }
 }
 module.exports = Game;

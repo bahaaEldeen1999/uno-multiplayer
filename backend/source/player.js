@@ -1,21 +1,27 @@
-
-
 class Player {
   cards;
   name;
   index;
-  constructor(name,index) {
+  playerId;
+  socketId;
+  drawCard = 0;
+  score = 0;
+  canEnd = false;
+  constructor(playerId, name, socketId) {
     this.cards = [];
     this.name = name;
-    this.index = index;
+    this.socketId = socketId;
+    this.playerId = playerId;
+    return this.id;
   }
+
   addCard(card) {
     this.cards.push(card);
   }
-  removeCard(index){
+
+  removeCard(index) {
     this.cards.splice(index, 1);
   }
-
 }
 
 module.exports = Player;

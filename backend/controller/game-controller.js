@@ -1,98 +1,92 @@
-const { gameModel } = require("../model/db-model");
 const Game = require("../source/game");
-// create the game
-let gameController = new Game();
-async function createGame(data, socket, io) {
+const GameHolder = require("../source/games-holder");
+const Player = require("../source/player");
+const gamesHolder = new GameHolder();
+
+function createGame(data, socket, io) {
   try {
     if (!data.name || data.number === undefined || !data.playerId)
       throw new Error("not enough data");
+    const newGame = new Game();
+    const player = new Player(data.playerId, data.name, socket.id);
+    newGame.addPlayer(player);
 
-    let newGame = new gameModel({
-      players: [
-        {
-          name: data.name,
-          index: data.number,
-          playerId: data.playerId,
-          socketId: socket.id,
-          drawCard: 0,
-          score: 0,
-        },
-      ],
-      currentPlayerTurn: 0,
-      gameStart: false,
-      isReversed: false,
-    });
-    await newGame.save();
+    // add game to game holder
+    gamesHolder.addGame(newGame);
+
     // send back id to host
+    // need to be changed to send to only player??
     socket.emit("createdGameId", {
-      gameId: newGame._id,
+      gameId: newGame.id,
       playerId: data.playerId,
     });
+
     // set gameid property on the socket object
-    socket.gameId = newGame._id;
+    socket.gameId = newGame.id;
   } catch (err) {
+    console.log(err);
     socket.emit("errorInRequest", { msg: err.message });
   }
 }
 
-async function joinGame(data, socket, io) {
+function joinGame(data, socket, io) {
   try {
     if (!data.gameId || !data.playerId) throw new Error("not enough data");
-    let game = await gameModel.findById(data.gameId);
+    const game = gamesHolder.getGame(data.gameId);
     if (!game) throw new Error("no game with this id");
 
     if (game.gameStart) {
       throw new Error("the game already runnning cannot join");
     }
+
     // check that didnt join before
     for (let player of game.players) {
       if (player.playerId == data.playerId) return;
     }
-    let index = game.players.length;
-    game.players.push({
-      name: data.name,
-      index: index,
-      playerId: data.playerId,
-      socketId: socket.id,
-      drawCard: 0,
-      score: 0,
-    });
+
+    const player = new Player(data.playerId, data.name, socket.id);
+    const index = game.addPlayer(player);
+
     // set gameid property on the socket object
-    socket.gameId = game._id;
-    let players = [];
-    for (let player of game.players) {
+    socket.gameId = game.id;
+    const players = [];
+    for (const player of game.players) {
       players.push({
         name: player.name,
         index: player.index,
       });
     }
-    game.markModified("players");
-    await game.save();
+
     socket.emit("joinedGame", {
-      gameId: game._id,
+      gameId: game.id,
       playerId: data.playerId,
       index: index,
     });
-    for (let player of game.players) {
+
+    // can be changed by cluster users in group??
+    for (const player of game.players) {
       io.to(player.socketId).emit("queueChanged", {
-        gameId: game._id,
+        gameId: game.id,
         players: players,
       });
     }
+
+    // update game to game holder
+    // not sure if necessary as JS should get object by reference not value
+    gamesHolder.addGame(game);
   } catch (err) {
+    console.log(err, data);
     socket.emit("errorInRequest", { msg: err.message });
   }
 }
 
-async function startGame(data, socket, io) {
+function startGame(data, socket, io) {
   try {
-    let game = await gameModel.findById(data.gameId);
+    const game = gamesHolder.getGame(data.gameId);
     if (!game) throw new Error("no game with this id");
 
-    let players = [];
-    for (let player of game.players) players.push(player);
-    game = await gameController.createGame(game._id, players);
-    players = [];
+    const players = [];
+    game.createGame();
     for (let player of game.players) {
       players.push({
         name: player.name,
@@ -101,6 +95,8 @@ async function startGame(data, socket, io) {
         score: player.score,
       });
     }
+
+    // can be changed to send to the group??
     for (let player of game.players) {
       io.to(player.socketId).emit("gameCreated", {
         gameId: data.gameId,
@@ -118,15 +114,20 @@ async function startGame(data, socket, io) {
         gameId: data.gameId,
       });
     }
+    // update game to game holder
+    // not sure if necessary as JS should get object by reference not value
+    gamesHolder.addGame(game);
   } catch (err) {
+    console.log(err);
     socket.emit("errorInRequest", { msg: err.message });
   }
 }
 
-async function playCard(data, scoket, io) {
+function playCard(data, socket, io) {
   try {
-    let isPlayed = await gameController.play(
-      data.gameId,
+    const game = gamesHolder.getGame(data.gameId);
+    if (!game) throw new Error("no game with this id");
+    const isPlayed = game.play(
       data.playerIndex,
       data.cardIndex,
       data.card,
@@ -147,7 +148,6 @@ async function playCard(data, scoket, io) {
       });
       return;
     }
-    let game = await gameModel.findById(data.gameId);
     let players = [];
     for (let player of game.players) {
       players.push({
@@ -157,6 +157,7 @@ async function playCard(data, scoket, io) {
         score: player.score,
       });
     }
+    // change method of sending
     for (let player of game.players) {
       io.to(player.socketId).emit("gameUpdated", {
         gameId: data.gameId,
@@ -224,12 +225,16 @@ async function playCard(data, scoket, io) {
         success: "game ended",
       });
     }
+    // update game to game holder
+    // not sure if necessary as JS should get object by reference not value
+    gamesHolder.addGame(game);
   } catch (err) {
+    console.log(err);
     socket.emit("errorInRequest", { msg: err.message });
   }
 }
 
-async function colorIsChosen(data, socket, io) {
+function colorIsChosen(data, socket, io) {
   try {
     if (
       !data.gameId ||
@@ -238,14 +243,10 @@ async function colorIsChosen(data, socket, io) {
       !data.playerId
     )
       throw new Error("data is not enough");
+    const game = gamesHolder.getGame(data.gameId);
+    if (!game) throw new Error("no game with this id");
 
-    await gameController.changCurrentColor(
-      data.gameId,
-      data.color,
-      data.playerIndex,
-      data.playerId
-    );
-    let game = await gameModel.findById(data.gameId);
+    game.changCurrentColor(data.color, data.playerIndex, data.playerId);
     let players = [];
     for (let player of game.players) {
       players.push({
@@ -255,6 +256,7 @@ async function colorIsChosen(data, socket, io) {
         score: player.score,
       });
     }
+    // change
     for (let player of game.players) {
       io.to(player.socketId).emit("gameUpdated", {
         gameId: data.gameId,
@@ -265,21 +267,23 @@ async function colorIsChosen(data, socket, io) {
         cardDrawn: true,
       });
     }
+    // update game to game holder
+    // not sure if necessary as JS should get object by reference not value
+    gamesHolder.addGame(game);
   } catch (err) {
+    console.log(err);
     socket.emit("errorInRequest", { msg: err.message });
   }
 }
 
-async function drawCard(data, socket, io) {
+function drawCard(data, socket, io) {
   try {
     if (!data.gameId || data.playerIndex === undefined || !data.playerId)
       throw new Error("data is not enough");
-    let x = await gameController.drawCard(
-      data.gameId,
-      data.playerIndex,
-      data.playerId
-    );
-    if (!x) {
+    const game = gamesHolder.getGame(data.gameId);
+    if (!game) throw new Error("no game with this id");
+    const x = game.drawCard(data.playerIndex, data.playerId);
+    if (x < 0) {
       socket.emit("cannotDraw", {
         gameId: data.gameId,
         playerIndex: data.playerIndex,
@@ -287,7 +291,6 @@ async function drawCard(data, socket, io) {
       });
       return;
     }
-    let game = await gameModel.findById(data.gameId);
     let players = [];
     for (let player of game.players) {
       players.push({
@@ -297,6 +300,7 @@ async function drawCard(data, socket, io) {
         score: player.score,
       });
     }
+    // change
     for (let player of game.players) {
       io.to(player.socketId).emit("gameUpdated", {
         gameId: data.gameId,
@@ -309,21 +313,24 @@ async function drawCard(data, socket, io) {
     }
 
     // update each on cards
-
+    // change
     socket.emit("getCards", {
       playerId: data.playerId,
       cards: game.players[data.playerIndex].cards,
       gameId: data.gameId,
     });
+    // update game to game holder
+    // not sure if necessary as JS should get object by reference not value
+    gamesHolder.addGame(game);
   } catch (err) {
     console.log(err);
     socket.emit("errorInRequest", { msg: err.message });
   }
 }
 
-async function endTurn(data, socket, io) {
+function endTurn(data, socket, io) {
   try {
-    let game = await gameModel.findById(data.gameId);
+    const game = gamesHolder.getGame(data.gameId);
     if (!game) throw new Error("no game with this id");
 
     if (
@@ -331,8 +338,7 @@ async function endTurn(data, socket, io) {
       game.players[game.currentPlayerTurn].playerId == data.playerId &&
       game.players[game.currentPlayerTurn].canEnd
     ) {
-      await gameController.calculateNextTurn(game);
-      await game.save();
+      game.calculateNextTurn();
       let players = [];
       for (let player of game.players) {
         players.push({
@@ -342,6 +348,7 @@ async function endTurn(data, socket, io) {
           score: player.score,
         });
       }
+      // change
       for (let player of game.players) {
         io.to(player.socketId).emit("gameUpdated", {
           gameId: data.gameId,
@@ -366,17 +373,21 @@ async function endTurn(data, socket, io) {
         msg: "cannot end turn draw card or play card",
       });
     }
+    // update game to game holder
+    // not sure if necessary as JS should get object by reference not value
+    gamesHolder.addGame(game);
   } catch (err) {
+    console.log(err);
     socket.emit("errorInRequest", { msg: err });
   }
 }
 
-async function disconnect(data, socket, io) {
+function disconnect(data, socket, io) {
   try {
     const socketId = socket.id;
     const gameId = socket.gameId;
-    const game = await gameModel.findById(gameId);
-    if (!game) return;
+    const game = gamesHolder.getGame(gameId);
+    if (!game) throw new Error("no game with this id");
     let player;
     let disconnected = 0;
     // remove this player from the game
@@ -387,8 +398,8 @@ async function disconnect(data, socket, io) {
         game.players.splice(i, 1);
         game.numberOfPlayers = game.players.length;
         if (game.numberOfPlayers == 0) {
-          // delete game from db
-          await gameModel.findByIdAndDelete(gameId);
+          // delete game
+          gamesHolder.removeGame(gameId);
           return;
         }
         break;
@@ -410,7 +421,6 @@ async function disconnect(data, socket, io) {
           playerName: player.name,
         });
       }
-      await game.save();
 
       let players = [];
       for (let player of game.players) {
@@ -434,51 +444,56 @@ async function disconnect(data, socket, io) {
       } else {
         for (let player of game.players) {
           io.to(player.socketId).emit("queueChanged", {
-            gameId: game._id,
+            gameId: game.id,
             players: players,
           });
         }
       }
     }
+    // update game to game holder
+    // not sure if necessary as JS should get object by reference not value
+    gamesHolder.addGame(game);
   } catch (err) {
     console.log(err);
     socket.emit("errorInRequest", { msg: err.message });
   }
 }
 
-async function chatMesssage(data, socket, io) {
+function chatMesssage(data, socket, io) {
   try {
     let gameId = data.gameId;
     let name = data.playerName;
     if (!gameId || !name) throw new Error("not enough data");
-    const game = await gameModel.findById(gameId);
+    const game = gamesHolder.getGame(data.gameId);
     if (!game) throw new Error("no game with this id");
     game.chat.push({
       playerName: name,
       message: data.message,
     });
-    await game.save();
     // emit the message to all players in the room
     for (let player of game.players) {
       io.to(player.socketId).emit("messageRecieve", {
-        gameId: game._id,
+        gameId: game.id,
         playerName: name,
         message: data.message,
         playerId: data.playerId,
       });
     }
+    // update game to game holder
+    // not sure if necessary as JS should get object by reference not value
+    gamesHolder.addGame(game);
   } catch (err) {
     console.log(err);
     socket.emit("errorInRequest", { msg: err.message });
   }
 }
 
-async function rematch(data, socket, io) {
+function rematch(data, socket, io) {
   try {
     if (!data.gameId) throw new Error("not enough data");
-    let game = await gameModel.findById(data.gameId);
-    // reset game
-    game = await gameController.resetGame(game);
+    const game = gamesHolder.getGame(data.gameId);
+    if (!game) throw new Error("no game with this id"); // reset game
+    game.resetGame();
     let players = [];
     for (let player of game.players) {
       players.push({
@@ -505,15 +520,18 @@ async function rematch(data, socket, io) {
         gameId: data.gameId,
       });
     }
+    // update game to game holder
+    // not sure if necessary as JS should get object by reference not value
+    gamesHolder.addGame(game);
   } catch (err) {
     socket.emit("errorInRequest", { msg: err.message });
   }
 }
 
-async function kickPlayer(data, scoket, io) {
+function kickPlayer(data, socket, io) {
   try {
     const gameId = data.gameId;
-    const game = await gameModel.findById(gameId);
+    const game = gamesHolder.getGame(gameId);
     if (!game) throw new Error("no game with this id");
     if (game.players[0].playerId != data.playerId)
       throw new Error("not the current host");
@@ -525,8 +543,6 @@ async function kickPlayer(data, scoket, io) {
     });
     game.players.splice(data.index, 1);
     game.numberOfPlayers = game.numberOfPlayers - 1;
-    game.markModified("players");
-    await game.save();
     // update current players index
     for (let i = 0; i < game.players.length; i++) {
       game.players[i].index = i;
@@ -559,17 +575,19 @@ async function kickPlayer(data, scoket, io) {
     } else {
       for (let player of game.players) {
         io.to(player.socketId).emit("queueChanged", {
-          gameId: game._id,
+          gameId: game.id,
           players: players,
         });
       }
     }
+    // update game to game holder
+    // not sure if necessary as JS should get object by reference not value
+    gamesHolder.addGame(game);
   } catch (err) {
     socket.emit("errorInRequest", { msg: err.message });
   }
 }
 module.exports = {
-  gameController,
   createGame,
   joinGame,
   startGame,
