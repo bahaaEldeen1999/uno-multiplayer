@@ -729,3 +729,19 @@ function onKickedPlayer() {
       });
   });
 }
+
+function onHostBtnPressed() {
+  let hostName = document.querySelector("#hostName").value;
+  let roomName = document.querySelector("#hostRoomName").value;
+  let isPrivate = document.querySelector("#isPrivateCheckbox").checked;
+  console.log(
+    `host name ${hostName} room name ${roomName} is private ${isPrivate}`
+  );
+}
+
+function onJoinBtnPressed() {
+  let joinName = document.querySelector("#joinName").value;
+  let gameId = document.querySelector("#joinGameId").value;
+
+  console.log(`join name ${joinName} game id ${gameId} `);
+}

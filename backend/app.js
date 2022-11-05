@@ -9,8 +9,10 @@ const app = express();
 const PORT = 3000;
 const server = http.createServer(app);
 app.use(cors());
-app.use(express.static("../output"));
-app.use(express.static("../styles"));
+app.use(express.static(path.join(__dirname, "../output")));
+//  app.use(express.static("../component"));
+console.log("path ", path.join(__dirname, "../output"));
+app.use(express.static(path.join(__dirname, "../styles")));
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../index.html"));
 });

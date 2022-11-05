@@ -7,7 +7,6 @@
     <link rel="icon" type="image/png" href="uno.png" />
 
     <!--material css-->
-
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
@@ -17,108 +16,95 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.0.0/animate.min.css"
     />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="./style.css" type="text/css" />
 
-    <link rel="stylesheet" href="owl.css" />
+    <link rel="stylesheet" href="./owl.css" />
   </head>
   <body>
-    <div id="method" class="modal">
-      <div class="modal-content">
-        <h4>How do you want to play cards?</h4>
-      </div>
-      <div class="modal-footer">
-        <a
-          class="modal-close waves-effect waves-green btn-flat"
-          id="snglClickBtn"
-          >click</a
-        >
-        <a
-          class="modal-close waves-effect waves-green btn-flat"
-          id="dblClickBtn"
-          >double click</a
-        >
-      </div>
-    </div>
-    <div id="modal1" class="modal">
-      <div class="modal-content">
-        <h4>welcome to uno multiplayer</h4>
-        <p>please enter your name</p>
-        <input
-          type="text"
-          id="nameInput"
-          placeholder="name"
-          value="default-name"
-        />
-      </div>
-      <div class="modal-footer">
-        <a
-          class="modal-close waves-effect waves-green btn-flat"
-          id="nameEnterBtn"
-          >Next</a
-        >
-      </div>
-    </div>
+    <div class="container">
+      <h1 class="center-align">Welcome To UNO Multiplayer</h1>
+      <div class="row">
+        <div class="col m6">
+          <h4 class="center-align">Public Rooms</h4>
+          <ul class="collection with-header">
+            <a href="#!" class="collection-item">Alvin</a>
+          </ul>
+        </div>
+        <div class="col m6">
+          <h4 class="center-align">Options</h4>
+          <div class="row">
+            <div class="col l6">
+              <h4 class="center-align">Host</h4>
 
-    <div id="modal2" class="modal">
-      <div class="modal-content">
-        <p>would you like to host a game ot join another game?</p>
-      </div>
-      <div class="modal-footer">
-        <a class="modal-close waves-effect waves-green btn-flat" id="hostBtn"
-          >Host</a
-        >
-        <a class="modal-close waves-effect waves-green btn-flat" id="joinBtn"
-          >Join</a
-        >
-      </div>
-    </div>
+              <div>
+                <div class="input-field">
+                  <input
+                    placeholder="Your Name"
+                    id="hostName"
+                    type="text"
+                    class="validate"
+                    required
+                  />
+                  <label for="hostName">Your Name</label>
+                </div>
+                <div class="input-field">
+                  <input
+                    placeholder="Room Name"
+                    id="hostRoomName"
+                    type="text"
+                    class="validate"
+                    required
+                  />
+                  <label for="hostRoomName">Room Name</label>
+                </div>
+                <div>
+                  <label>
+                    <input type="checkbox" id="isPrivateCheckbox" />
+                    <span>Private</span>
+                  </label>
+                </div>
+                <input
+                  class="waves-effect waves-light btn"
+                  id="HostGameBtn"
+                  type="submit"
+                  value="Host"
+                />
+              </div>
+            </div>
 
-    <div id="modal3" class="host-modal modal">
-      <div class="modal-content">
-        <h5>
-          here is your game id make sure to send it to your friends so they can
-          join you
-        </h5>
-        <p id="gameIdText">gameid</p>
-      </div>
-      <div class="modal-footer">
-        <a
-          class="modal-close waves-effect waves-green btn-flat"
-          id="modalHostClose"
-          >Ok</a
-        >
-      </div>
-    </div>
-
-    <div id="modal4" class="join-modal modal">
-      <div class="modal-content">
-        <h4>please enter the id of the game you want to join</h4>
-        <input type="text" id="gameIdInput" placeholder="game id" />
-      </div>
-      <div class="modal-footer">
-        <a
-          class="modal-close waves-effect waves-green btn-flat"
-          id="joinGameBtn"
-          >Join</a
-        >
-      </div>
-    </div>
-    <div id="modal5" class="choose-color modal">
-      <div class="modal-content">
-        <h4>choose a color</h4>
-        <select>
-          <option value="red">red</option>
-          <option value="green">green</option>
-          <option value="blue">blue</option>
-          <option value="yellow">yellow</option>
-        </select>
-      </div>
-      <div class="modal-footer">
-        <a
-          class="modal-close waves-effect waves-green btn-flat"
-          id="choosColorBtn"
-          >Ok</a
-        >
+            <div class="col l6">
+              <h4 class="center-align">Join Directly</h4>
+              <div>
+                <div class="input-field">
+                  <input
+                    placeholder="Your Name"
+                    id="joinName"
+                    type="text"
+                    class="validate"
+                    required
+                  />
+                  <label for="joinName">Your Name</label>
+                </div>
+                <div class="input-field">
+                  <input
+                    placeholder="Game Id"
+                    id="joinGameId"
+                    type="text"
+                    class="validate"
+                    required
+                  />
+                  <label for="joinGameId">Game Id</label>
+                </div>
+                <input
+                  class="waves-effect waves-light btn"
+                  id="joinGameBtn"
+                  type="submit"
+                  value="Join"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <ul id="queue" class="collection"></ul>
@@ -138,6 +124,42 @@
       <div class="col" style="text-align: center"></div>
       <div class="deck">
         <div class="frame owl-carousel owl-theme carousel" id="frame"></div>
+      </div>
+    </div>
+
+    <div id="showGameIdModal" class="host-modal modal">
+      <div class="modal-content">
+        <h5>
+          here is your game id make sure to send it to your friends so they can
+          join you
+        </h5>
+        <p id="gameIdText">gameid</p>
+      </div>
+      <div class="modal-footer">
+        <a
+          class="modal-close waves-effect waves-green btn-flat"
+          id="modalHostClose"
+          >Ok</a
+        >
+      </div>
+    </div>
+
+    <div id="colorModal" class="choose-color modal">
+      <div class="modal-content">
+        <h4>choose a color</h4>
+        <select>
+          <option value="red">red</option>
+          <option value="green">green</option>
+          <option value="blue">blue</option>
+          <option value="yellow">yellow</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <a
+          class="modal-close waves-effect waves-green btn-flat"
+          id="choosColorBtn"
+          >Ok</a
+        >
       </div>
     </div>
 
@@ -178,10 +200,10 @@
     </script>
     <script src="card.component.js"></script>
     <script src="deck.component.js"></script>
-    <script src="players.compnent.js"></script>
-    <script src="board.compnent.js"></script>
-    <script src="utils/globals.js"></script>
-    <script src="utils/helpers.js"></script>
-    <script src="app.js"></script>
+    <script src="./players.compnent.js"></script>
+    <script src="./board.compnent.js"></script>
+    <script src="./utils/globals.js"></script>
+    <script src="./utils/helpers.js"></script>
+    <script src="./app.js"></script>
   </body>
 </html>
