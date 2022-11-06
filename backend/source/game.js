@@ -13,6 +13,8 @@ class Game {
   numberOfPlayers = 0;
   chat = [];
   id = null;
+  isPrivate = false;
+  name = "";
 
   constructor() {
     this.id = helpers.generateId();

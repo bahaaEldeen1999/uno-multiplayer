@@ -21,14 +21,47 @@
     <link rel="stylesheet" href="./owl.css" />
   </head>
   <body>
+    <div id="method" class="modal">
+      <div class="modal-content">
+        <h4>How do you want to play cards?</h4>
+      </div>
+      <div class="modal-footer">
+        <a
+          class="modal-close waves-effect waves-green btn-flat"
+          id="snglClickBtn"
+          >click</a
+        >
+        <a
+          class="modal-close waves-effect waves-green btn-flat"
+          id="dblClickBtn"
+          >double click</a
+        >
+      </div>
+    </div>
+    <div id="getJoinerNameModal" class="modal">
+      <div class="modal-content">
+        <p>please enter your name</p>
+        <input
+          type="text"
+          id="nameInput"
+          placeholder="name"
+          value="default-name"
+        />
+      </div>
+      <div class="modal-footer">
+        <a
+          class="modal-close waves-effect waves-green btn-flat"
+          id="nameEnterBtn"
+          >Next</a
+        >
+      </div>
+    </div>
     <div class="container">
       <h1 class="center-align">Welcome To UNO Multiplayer</h1>
       <div class="row">
         <div class="col m6">
           <h4 class="center-align">Public Rooms</h4>
-          <ul class="collection with-header">
-            <a href="#!" class="collection-item">Alvin</a>
-          </ul>
+          <ul class="collection with-header" id="roomsList"></ul>
         </div>
         <div class="col m6">
           <h4 class="center-align">Options</h4>

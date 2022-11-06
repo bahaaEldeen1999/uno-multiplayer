@@ -530,3 +530,31 @@ socket.on("kickedPlayer", (data) => {
       window.location.href = "/";
     });
 });
+
+socket.on("publicRoomsChanged", (data) => {
+  const games = data.games;
+  const listOfGames = document.getElementById("roomsList");
+  if (!listOfGames) return;
+  listOfGames.innerHTML = "";
+  for (let game of games) {
+    let _gameId = game.gameId;
+    let name = game.name;
+    const listItem = document.createElement("li");
+    listItem.innerHTML = ` <a id="${_gameId}"  class="roomBtn collection-item">${name}</a>`;
+    listOfGames.appendChild(listItem);
+    listItem.addEventListener("click", (e) => {
+      // console.log(e.target.id);
+      gameId = e.target.id;
+      getJoinerNameModal.open();
+      // get user name
+      $("#nameEnterBtn").click(() => {
+        let inputText = document.querySelector("#nameInput").value;
+        if (!inputText) inputText = "default-name";
+        playerName = inputText;
+        getJoinerNameModal.close();
+        joinGame(playerName, _gameId);
+        document.querySelector(".container").remove();
+      });
+    });
+  }
+});

@@ -178,3 +178,8 @@ ul.sidenav {
 .waves-effect input[type="submit"] {
   color: white !important;
 }
+
+.roomBtn {
+  text-align: center;
+  cursor: pointer;
+}

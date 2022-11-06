@@ -8,6 +8,8 @@ function createGame(data, socket, io) {
     if (!data.name || data.number === undefined || !data.playerId)
       throw new Error("not enough data");
     const newGame = new Game();
+    newGame.isPrivate = data.isPrivate;
+    newGame.name = data.roomName;
     const player = new Player(data.playerId, data.name, socket.id);
     newGame.addPlayer(player);
 
@@ -589,6 +591,21 @@ function kickPlayer(data, socket, io) {
     socket.emit("errorInRequest", { msg: err.message });
   }
 }
+
+function getPublicGames() {
+  let games = [];
+  for (let gameId in gamesHolder.games) {
+    const game = gamesHolder.games[gameId];
+    if (!game.isPrivate) {
+      games.push({
+        gameId: gameId,
+        name: game.name,
+      });
+    }
+  }
+
+  return games;
+}
 module.exports = {
   createGame,
   joinGame,
@@ -601,4 +618,5 @@ module.exports = {
   chatMesssage,
   rematch,
   kickPlayer,
+  getPublicGames,
 };

@@ -48,4 +48,10 @@ module.exports = async function (socket, io) {
   socket.on("kickPlayer", async (data) => {
     gameController.kickPlayer(data, socket, io);
   });
+
+  setInterval(() => {
+    // // emit to all people in server that a new public game may be available
+    const games = gameController.getPublicGames();
+    io.emit("publicRoomsChanged", { games: games });
+  }, 4000);
 };

@@ -8,6 +8,19 @@ document.querySelector("#HostGameBtn").addEventListener("click", () => {
 document.querySelector("#joinGameBtn").addEventListener("click", () => {
   onJoinBtnPressed();
 });
+
+method.open();
+dblClickBtn.addEventListener("click", () => {
+  mainThemeAudio.play();
+  methodClick = "dblclick";
+  method.close();
+});
+snglClickBtn.addEventListener("click", () => {
+  mainThemeAudio.play();
+  methodClick = "click";
+  method.close();
+});
+
 addEventListener("DOMContentLoaded", () => {
   socket.on("connect", async () => {
     console.log("connected client");
