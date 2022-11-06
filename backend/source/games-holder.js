@@ -12,7 +12,8 @@ class GamesHolder {
   }
 
   removeGame(gameId) {
-    this.games[gameId] = null;
+    this.games[gameId] = undefined;
+    delete this.games[gameId];
   }
 }
 

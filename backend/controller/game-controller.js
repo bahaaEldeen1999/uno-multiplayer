@@ -33,8 +33,9 @@ function joinGame(data, socket, io) {
   try {
     if (!data.gameId || !data.playerId) throw new Error("not enough data");
     const game = gamesHolder.getGame(data.gameId);
-    if (!game) throw new Error("no game with this id");
 
+    if (!game) throw new Error("no game with this id");
+    console.log("game", game);
     if (game.gameStart) {
       throw new Error("the game already runnning cannot join");
     }
@@ -65,6 +66,7 @@ function joinGame(data, socket, io) {
 
     // can be changed by cluster users in group??
     for (const player of game.players) {
+      console.log("playewrs in game ", player);
       io.to(player.socketId).emit("queueChanged", {
         gameId: game.id,
         players: players,
@@ -387,7 +389,7 @@ function disconnect(data, socket, io) {
     const socketId = socket.id;
     const gameId = socket.gameId;
     const game = gamesHolder.getGame(gameId);
-    if (!game) throw new Error("no game with this id");
+    if (!game) return;
     let player;
     let disconnected = 0;
     // remove this player from the game

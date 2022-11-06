@@ -37,5 +37,11 @@ addEventListener("DOMContentLoaded", () => {
     // onMessageRecieved();
     // onChangeIndex();
     // onKickedPlayer();
+
+    // onQueueChanged();
+
+    // socket.on("queueChanged", () => {
+    //   console.log("queeeee changed");
+    // });
   });
 });

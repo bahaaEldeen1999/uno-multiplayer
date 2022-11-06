@@ -1,11 +1,13 @@
 const gameController = require("../controller/game-controller");
 module.exports = async function (socket, io) {
   socket.on("createGame", async (data) => {
+    console.log("create game", data);
     gameController.createGame(data, socket, io);
   });
 
   // when other user want to join game
   socket.on("joinGame", async (data) => {
+    console.log("join game", data);
     gameController.joinGame(data, socket, io);
   });
 
