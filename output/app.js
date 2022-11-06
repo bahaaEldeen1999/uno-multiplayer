@@ -11,12 +11,12 @@ document.querySelector("#joinGameBtn").addEventListener("click", () => {
 
 method.open();
 dblClickBtn.addEventListener("click", () => {
-  mainThemeAudio.play();
+  //mainThemeAudio.play();
   methodClick = "dblclick";
   method.close();
 });
 snglClickBtn.addEventListener("click", () => {
-  mainThemeAudio.play();
+  // mainThemeAudio.play();
   methodClick = "click";
   method.close();
 });
