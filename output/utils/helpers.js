@@ -76,12 +76,24 @@ function hostGame(hostName, roomName, isPrivate) {
   let showGameId = document.createElement("a");
   showGameId.className = "btn-floating btn-large waves-effect waves-light teal";
   showGameId.innerText = "gameId";
-  showGameId.addEventListener("click", () => {
-    swal.fire({
-      confirmButtonColor: "#2c3e50",
-      icon: "info",
-      title: "your game id is : " + gameId,
-      showConfirmButton: true,
+  showGameId.addEventListener("click", async () => {
+    await navigator.clipboard.writeText(gameId);
+    Swal.fire({
+      position: "bottom",
+      title: `Game ID copied to Clipboard`,
+      timer: 500,
+      backdrop: false,
+      showConfirmButton: false,
+      didDestroy: () => {
+        swal.fire({
+          confirmButtonColor: "#2c3e50",
+          icon: "info",
+          title: "your game id is : " + gameId,
+          //showConfirmButton: true,
+          timer: 1000,
+          backdrop: false,
+        });
+      },
     });
   });
   // intialize chat button
@@ -95,7 +107,7 @@ function hostGame(hostName, roomName, isPrivate) {
   chatInputDiv.className = "input-field col s12";
   let chatInputTextarea = document.createElement("textarea");
   chatInputTextarea.className = "materialize-textarea";
-  chatInputTextarea.setAttribute("placeholder", "enter your message");
+  chatInputTextarea.setAttribute("placeholder", "Enter your message");
   chatInputTextarea.addEventListener("keypress", function (e) {
     console.log("sending chat");
     if (e.key === "Enter") {

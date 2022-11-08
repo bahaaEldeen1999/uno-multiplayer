@@ -15,13 +15,34 @@ socket.on("joinedGame", (data) => {
   let showGameId = document.createElement("a");
   showGameId.className = "btn-floating btn-large waves-effect waves-light teal";
   showGameId.innerText = "gameId";
-  showGameId.addEventListener("click", () => {
-    swal.fire({
-      confirmButtonColor: "#2c3e50",
-      icon: "info",
-      title: "your game id is : " + gameId,
-      showConfirmButton: true,
+  showGameId.addEventListener("click", async () => {
+    await navigator.clipboard.writeText(gameId);
+    Swal.fire({
+      position: "bottom",
+      title: `Game ID copied to Clipboard`,
+      timer: 1000,
+      backdrop: false,
+      showConfirmButton: false,
+      didDestroy: () => {
+        swal.fire({
+          confirmButtonColor: "#2c3e50",
+          icon: "info",
+          title: "your game id is : " + gameId,
+          //showConfirmButton: true,
+          timer: 1000,
+          backdrop: false,
+        });
+      },
     });
+    // swal.fire({
+    // //   confirmButtonColor: "#2c3e50",
+    // //   icon: "info",
+    // //   title: "your game id is : " + gameId,
+    // //   //   showConfirmButton: true,
+    // //   timer: 1000,
+    // //   backdrop: false,
+
+    // // });
   });
   // intialize chat button
   let sideNavChat = document.createElement("ul");
@@ -34,7 +55,7 @@ socket.on("joinedGame", (data) => {
   chatInputDiv.className = "input-field col s12";
   let chatInputTextarea = document.createElement("textarea");
   chatInputTextarea.className = "materialize-textarea";
-  chatInputTextarea.setAttribute("placeholder", "enter your message");
+  chatInputTextarea.setAttribute("placeholder", "Enter your message");
   chatInputTextarea.addEventListener("keypress", function (e) {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -347,7 +368,16 @@ socket.on("messageRecieve", (data) => {
   if (data.gameId != gameId) return;
   let navChat = document.querySelector("#chatBox");
   let li = document.createElement("li");
-  li.innerText = `${data.playerName}: ${data.message}`;
+  let isOwner = data.playerId == playerId;
+  li.classList.add("chat-msg");
+  if (isOwner) {
+    li.classList.add("owner-chat");
+    li.innerHTML = `<span class="player-name-msg">You: </span> ${data.message}`;
+  } else {
+    li.classList.add("other-chat");
+    li.innerHTML = `<span class="player-name-msg">${data.playerName}: </span> ${data.message}`;
+  }
+
   navChat.appendChild(li);
   navChat.scrollTop = navChat.scrollHeight;
   if (playerId != data.playerId) {

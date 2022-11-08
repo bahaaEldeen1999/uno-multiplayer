@@ -100,7 +100,7 @@ select {
   bottom: 0;
   left: 0;
   margin: 10px;
-  padding: 5px;
+  /* padding: 5px; */
   cursor: pointer;
   border-radius: 10px;
   z-index: 5;
@@ -121,9 +121,10 @@ textarea {
 #chatBox {
   overflow: auto;
   height: 100%;
+  padding: 20px;
 }
 #chatBox li:last-of-type {
-  padding-bottom: 45px;
+  margin-bottom: 45px;
 }
 ul.sidenav {
   overflow-y: hidden;
@@ -182,4 +183,41 @@ ul.sidenav {
 .roomBtn {
   text-align: center;
   cursor: pointer;
+}
+
+.chat-msg {
+  margin: 10px 0;
+  padding: 10px;
+  color: white;
+}
+
+.owner-chat {
+  background: #9b59b6;
+  border-radius: 5px 30px 30px 10px;
+}
+
+.other-chat {
+  background: #3498db;
+  border-radius: 30px 10px 15px 30px;
+
+  /* text-align: right; */
+}
+
+#chat-slide textarea {
+  border-top: 1px solid rgba(22, 160, 133, 1) !important;
+  padding: 10px !important;
+}
+
+.player-name-msg {
+  font-weight: 800;
+}
+
+.btn-floating.btn-large {
+  width: 100px;
+  height: 100px;
+  padding: 20px;
+}
+
+button {
+  margin: 10px;
 }
