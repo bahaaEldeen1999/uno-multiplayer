@@ -213,9 +213,9 @@ ul.sidenav {
 }
 
 .btn-floating.btn-large {
-  width: 100px;
-  height: 100px;
-  padding: 20px;
+  width: 60px;
+  height: 60px;
+  padding: 2px;
 }
 
 button {
