@@ -37,7 +37,8 @@
 ![uno gif](screenshots/uno.gif)
 
 #### newish game (after the latest update)
-<video src="screenshots/uno_linked.mp4">
+![uno gif](screenshots/uno_linked.gif)
+
 ### walkthrough the game
 <h4>Well the latest update just made the game a piece of cake to figure out on your own, no need for these screenshots anymore :) </h4>
 
