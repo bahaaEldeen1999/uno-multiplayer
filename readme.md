@@ -33,22 +33,14 @@
 
 #### almost all the game is written in typescript/javascript for both the backend and front end 
 
+#### old game
 ![uno gif](screenshots/uno.gif)
+
+#### newish game (after the latest update)
+<video src="screenshots/uno_linked.mp4">
 ### walkthrough the game
-<h4>choose how you want to play cards whether by single or double mouse click</h4>
-<img src="screenshots/1.png">
-<h4>enter the nickname you want to use</h4>
-<img src="screenshots/2.png">
-<h4>choose if you want ot host new game or join already hosted game</h4>
-<img src="screenshots/3-a.png">
-<h4>if you choost to host you will be given game id</h4>
-<img src="screenshots/4.png">
-<h4>if you choost to join you will need to enter the game id</h4>
-<img src="screenshots/3-b.png">
-<h4>the players queue</h4>
-<img src="screenshots/5.png">
-<h4>the game ui</h4>
-<img src="screenshots/6.png">
+<h4>Well the latest update just made the game a piece of cake to figure out on your own, no need for these screenshots anymore :) </h4>
+
 
 
 #### what will i add in the future:
